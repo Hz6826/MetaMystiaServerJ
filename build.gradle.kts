@@ -16,13 +16,13 @@ dependencies {
     implementation("io.netty:netty-all:4.2.9.Final")
 
     // json library
-    implementation("com.fasterxml.jackson.core:jackson-databind:3.0.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
 
     // logging library
     implementation("org.apache.logging.log4j:log4j-core:2.25.3")
-
-    // slf4j
-    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.apache.logging.log4j:log4j-api:2.25.3")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.25.3")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 
     // command library, cuz i like it
     implementation("com.mojang:brigadier:1.0.18")
