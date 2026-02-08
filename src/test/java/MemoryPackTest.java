@@ -3,7 +3,6 @@ import com.hz6826.memorypack.serializer.SerializerRegistry;
 import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.network.actions.HelloAction;
 import com.metamystia.server.network.actions.generated.HelloActionMemoryPackSerializer;
-import com.metamystia.server.util.DebugUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
