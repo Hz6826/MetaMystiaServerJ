@@ -1,0 +1,17 @@
+{
+  "name": "MetaMystiaServerJ",
+  "description": "A java server implementation for mod MetaMystia.",
+  "license": "AGPL-3",
+  "source": "https://github.com/Hz6826/MetaMystiaServerJ",
+  "issueTracker": "https://github.com/Hz6826/MetaMystiaServerJ/issues",
+  "authors": [
+    {
+      "name": "Hz6826",
+      "url": "https://github.com/Hz6826"
+    }
+  ],
+  "version": "${VERSION}",
+  "buildTime": "${BUILD_TIME}",
+  "gitCommit": "${GIT_COMMIT}",
+  "metaMystiaVersion": "${META_MYSTIA_VERSION}"
+}

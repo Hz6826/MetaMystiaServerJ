@@ -1,0 +1,39 @@
+package com.metamystia.server.network.actions.storyaffect;
+
+import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.network.actions.ActionType;
+import io.netty.channel.ChannelHandlerContext;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Getter;
+
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Data
+@MemoryPackable
+public class BuffAction extends AffectStoryAction{
+    @Getter
+    public enum QTEBuff {
+        InstantEvaluation(0), // 立即完食
+        PatientFreeze(1), // 耐心不减
+        ThrowDeliver(2),   // 投掷上菜
+
+        Fever(3),      // 热火朝天
+        Fever_Infinite(-1);  // 永续热火朝天
+
+        QTEBuff(int value) {
+            this.value = value;
+        }
+
+        private final int value;
+    }
+    public ActionType type = ActionType.BUFF;
+
+    public QTEBuff buff;
+
+    @Override
+    public void onReceivedDerived(String channelId) {
+
+    }
+}
