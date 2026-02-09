@@ -3,6 +3,7 @@ import java.util.Date
 
 plugins {
     id("java")
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 group = "com.metamystia.server"
@@ -88,4 +89,10 @@ tasks.test {
     jvmArgs("-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=build/heapdump.hprof")
 
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "com.metamystia.server.Main"
+    }
 }
