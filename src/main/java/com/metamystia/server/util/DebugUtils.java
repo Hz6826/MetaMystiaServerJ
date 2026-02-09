@@ -13,6 +13,7 @@ public class DebugUtils {
         while (copy.readableBytes() > 0) {
             sb.append(String.format("%02X ", copy.readByte()));
         }
+        copy.release();
         log.debug(sb.toString());
     }
 }
