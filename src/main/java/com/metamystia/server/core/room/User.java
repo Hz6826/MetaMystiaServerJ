@@ -48,8 +48,8 @@ public class User {
         userIdMap.put(user.getId(), user);
     }
 
-    public static User removeUser(long id) {
-        return userIdMap.remove(id);
+    public static void removeUser(User user) {
+        userIdMap.remove(user.getId());
     }
 
     public static User getUserById(long id) {
@@ -90,5 +90,9 @@ public class User {
 
     public void sendMessage(String message) {
         this.sendAction(new MessageAction(message));
+    }
+
+    public void closeWithReason(String reason) {
+        MainPacketHandler.closeWithReason(this.getChannelId(), reason);
     }
 }

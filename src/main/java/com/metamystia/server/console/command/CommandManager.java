@@ -1,8 +1,5 @@
 package com.metamystia.server.console.command;
 
-import com.metamystia.server.network.GameServer;
-import com.metamystia.server.network.actions.ReadyAction;
-import com.metamystia.server.network.actions.SelectAction;
 import com.metamystia.server.util.DebugUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -21,54 +18,38 @@ public class CommandManager {
     public static final String COMMAND_PREFIX = "!";
     private static final Map<String, ParseResults<CommandSource>> PARSE_CACHE = new ConcurrentHashMap<>();
 
-    private final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
+    public static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
 
-    private CommandManager() {
-        this.dispatcher.register(
+    public static void init() {
+        dispatcher.register(
                 literal("debug").requires(commandSource -> DebugUtils.debug)
-                        .then(literal("help").executes(context -> {
-                            context.getSource().user().sendMessage("Hello, world!");
-                            log.info("Help command executed.");
-                            return 1;
-                        }))
-                        .then(literal("stop").executes( context -> {
-                            GameServer.getInstance().stop();
-                            return 1;
-                        }))
-                        .then(literal("sendReady").executes(context -> {
-                            context.getSource().user().sendAction(new ReadyAction(ReadyAction.ReadyType.DayOver, true));
-                            return 1;
-                        }))
+                        .then(literal("help").executes(DebugCommands::helpCommandNoArgs)
+                                .then(argument("command", StringArgumentType.greedyString()).executes(DebugCommands::helpCommand)))
+                        .then(literal("stop").executes(DebugCommands::stopCommand))
+                        .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
                         .then(literal("sendSelect")
                                 .then(argument("mapLabel", StringArgumentType.word())
-                                        .then(argument("mapLevel", IntegerArgumentType.integer(1, 3)).executes(context -> {
-                                            String mapLabel = StringArgumentType.getString(context, "mapLabel");
-                                            int mapLevel = IntegerArgumentType.getInteger(context, "mapLevel");
-                                            context.getSource().user().sendAction(new SelectAction(mapLabel, mapLevel));
-                                            return 1;
-                        }))))
-                        .then(literal("switchEcho").executes(context -> {
-                            DebugUtils.echo = !DebugUtils.echo;
-                            context.getSource().user().sendMessage("Echo mode switched to: " + DebugUtils.echo);
-                            return 1;
-                        }))
-
+                                        .then(argument("mapLevel", IntegerArgumentType.integer(1, 3))
+                                                .executes(DebugCommands::sendSelectCommand))))
+                        .then(literal("closeWithReason")
+                                .then(argument("reason", StringArgumentType.greedyString()).executes(DebugCommands::closeWithReasonCommand)))
+                        .then(literal("switchEcho").executes(DebugCommands::switchEchoCommand))
         );
     }
 
-    public void parse(String command, CommandSource source){
+    public static void parse(String command, CommandSource source){
         if(command.startsWith(COMMAND_PREFIX)) command = command.substring(1);
         try {
             ParseResults<CommandSource> parseResults;
             if(PARSE_CACHE.containsKey(command)) {
                 parseResults = PARSE_CACHE.get(command);
             } else {
-                parseResults = this.dispatcher.parse(command, source);
+                parseResults = dispatcher.parse(command, source);
                 PARSE_CACHE.put(command, parseResults);
             }
             dispatcher.execute(parseResults);
         } catch (Exception e) {
-            log.error("Failed to parse command: {}", e.getMessage(), e);
+            log.error("Failed to parse command: {} from {}", command, source.user(), e);
             source.user().sendMessage("Failed to parse command: " + e.getMessage());
         }
     }
@@ -83,11 +64,5 @@ public class CommandManager {
 
     public static <T> RequiredArgumentBuilder<CommandSource, T> argument(final String name, final ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
-    }
-
-    private static final CommandManager INSTANCE = new CommandManager();
-
-    public static CommandManager getInstance() {
-        return INSTANCE;
     }
 }

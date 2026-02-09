@@ -32,7 +32,7 @@ public class MessageAction extends AbstractNetAction {
     @Override
     public void onReceivedDerived(String channelId) {
         if (message.startsWith(CommandManager.COMMAND_PREFIX)) {
-            CommandManager.getInstance().parse(message, new CommandSource(User.getUserById(getSenderId()), getTimestampMs()));
+            CommandManager.parse(message, new CommandSource(User.getUserById(getSenderId()), getTimestampMs()));
         }
     }
 }

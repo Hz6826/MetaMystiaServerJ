@@ -1,6 +1,7 @@
 package com.metamystia.server;
 
 import com.hz6826.memorypack.util.MemoryPackInitializerWrapper;
+import com.metamystia.server.console.command.CommandManager;
 import com.metamystia.server.network.GameServer;
 import com.metamystia.server.util.BootstrapTips;
 import com.metamystia.server.util.DebugUtils;
@@ -37,6 +38,7 @@ public class Main {
         }
 
         MemoryPackInitializerWrapper.registerAll();
+        CommandManager.init();
 
         try {
             GameServer.getInstance().run();

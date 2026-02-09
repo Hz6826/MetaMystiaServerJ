@@ -2,8 +2,10 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
+import com.metamystia.server.core.room.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
+import com.metamystia.server.network.actions.MessageAction;
 import com.metamystia.server.util.DebugUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Handles game server communication.
@@ -63,7 +66,10 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error(cause.getMessage(), cause);
-        ctx.close();
+        closeWithReason(ctx.channel().id().asLongText(), cause.getMessage());
+        if(ctx.channel().isActive()) {
+            ctx.close();  // just in case
+        }
     }
 
     @Override
@@ -76,20 +82,34 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.info("Connection closed from {}", ctx.channel().remoteAddress());
+        User.removeUser(User.getUserByChannelId(ctx.channel().id().asLongText()));
         channels.remove(ctx.channel().id().asLongText());
         super.channelInactive(ctx);
     }
 
     private static Channel getChannel(String channelId) {
-        return channels.get(channelId);
+        Channel channel = channels.get(channelId);
+        if (channel == null) {
+            log.error("Channel {} not found", channelId);
+        }
+        return channel;
+    }
+
+    private static void withChannel(String channelId, Consumer<Channel> action) {
+        Channel channel = getChannel(channelId);
+        if (channel != null) {
+            action.accept(channel);
+        }
     }
 
     public static void sendAction(String channelId, AbstractNetAction action) {
-        Channel channel = getChannel(channelId);
-        if(channel == null) {
-            log.error("Channel {} not found", channelId);
-            return;
-        }
-        channel.writeAndFlush(action);
+        withChannel(channelId, channel -> channel.writeAndFlush(action));
+    }
+
+    public static void closeWithReason(String channelId, String reason) {
+        withChannel(channelId, channel -> {
+            sendAction(channelId, new MessageAction("Connection closed with reason: \n" + reason));
+            channel.close();
+        });
     }
 }

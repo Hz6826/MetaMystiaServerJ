@@ -3,6 +3,9 @@ package com.metamystia.server.network.actions;
 import com.hz6826.memorypack.annotation.MemoryPackable;
 import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.core.room.User;
+import com.metamystia.server.network.handlers.MainPacketHandler;
+import com.metamystia.server.util.ManifestManager;
+import com.metamystia.server.util.VersionValidators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -51,7 +54,12 @@ public class HelloAction extends AbstractNetAction{
 
     @Override
     public void onReceivedDerived(String channelId) {
-        User.createUser(this, channelId);
+        User.createUser(this, channelId);  // to avoid no user found in MainPacketHandler.channelInactive method
+        if (!VersionValidators.isMetaMystiaVersionValid(this.getVersion())) {
+            MainPacketHandler.closeWithReason(channelId, "Invalid version! Supported version(s): " + ManifestManager.getManifest().metaMystiaVersion());
+            return;
+        }
+
         log.info("User registered: {}, channel: {}", this.getSenderId(), channelId);
     }
 }

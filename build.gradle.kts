@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.metamystia.server"
-version = "0.1.2"
+version = "0.1.3"
 
 var metaMystiaVersion = "~0.15.0"
 
@@ -69,6 +69,11 @@ val gitCommit: String = try {
 }
 
 tasks.processResources {
+    inputs.property("version", version)
+    inputs.property("buildTime", buildTime)
+    inputs.property("gitCommit", gitCommit)
+    inputs.property("metaMystiaVersion", metaMystiaVersion)  // to ensure it's updated
+
     from(file("${project.rootDir}/LICENSE"))
     from(file("${project.rootDir}/README.md"))
 
