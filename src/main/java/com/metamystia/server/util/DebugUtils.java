@@ -5,7 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DebugUtils {
+    public static boolean debug = false;
+    public static boolean echo = false;
+    public static boolean logHex = false;
+
     public static void logBufHex(ByteBuf buf, String message) {
+        if (!logHex) return;
         ByteBuf copy = buf.copy();
         StringBuilder sb = new StringBuilder();
         sb.append(message).append(": ");
@@ -14,6 +19,6 @@ public class DebugUtils {
             sb.append(String.format("%02X ", copy.readByte()));
         }
         copy.release();
-        log.debug(sb.toString());
+        log.info(sb.toString());
     }
 }

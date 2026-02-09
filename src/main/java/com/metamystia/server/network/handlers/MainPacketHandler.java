@@ -2,10 +2,9 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
-import com.metamystia.server.core.room.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
-import com.metamystia.server.network.actions.HelloAction;
+import com.metamystia.server.util.DebugUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,41 +21,42 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
 
-    public static boolean echo = false;  // debug
-
     @Override
     @SuppressWarnings("unchecked")
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf in = (ByteBuf) msg;
+        try {
+            in.skipBytes(5);  // 01 01 00 00 00 TODO
 
-        in.skipBytes(5);  // 01 01 00 00 00 TODO
+            int index = in.readByte();
+            if(index < 0 || index >= ActionType.values().length) {
+                log.error("Invalid action type index: {}", index);
+                ctx.close();
+                return;
+            }
+            ActionType actionType = ActionType.values()[index];
+            Class<?> clazz = actionType.getRelatedActionClass();
+            if(clazz == null) {
+                log.error("Action type {} has no related action class", actionType);
+                ctx.close();
+                return;
+            }
+            MemoryPackSerializer<? extends AbstractNetAction> serializer = (MemoryPackSerializer<? extends AbstractNetAction>) SerializerRegistry.getInstance().getSerializer(clazz);
 
-        int index = in.readByte();
-        if(index < 0 || index >= ActionType.values().length) {
-            log.error("Invalid action type index: {}", index);
+            AbstractNetAction action = serializer.deserialize(in);
+
+            String channelId = ctx.channel().id().asLongText();
+
+            action.onReceived(channelId);
+
+            if (DebugUtils.echo) {
+                sendAction(channelId, action);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             ctx.close();
-            return;
-        }
-        ActionType actionType = ActionType.values()[index];
-        Class<?> clazz = actionType.getRelatedActionClass();
-        if(clazz == null) {
-            log.error("Action type {} has no related action class", actionType);
-            ctx.close();
-            return;
-        }
-        MemoryPackSerializer<? extends AbstractNetAction> serializer = (MemoryPackSerializer<? extends AbstractNetAction>) SerializerRegistry.getInstance().getSerializer(clazz);
-
-        AbstractNetAction action = serializer.deserialize(in);
-
-        action.onReceived(ctx.channel().id().asLongText());
-
-        if (action instanceof HelloAction helloAction) {
-            User.createUser(helloAction, ctx.channel().id().asLongText());
-            log.info("User registered: {}, channel: {}", helloAction.getSenderId(), ctx.channel().id().asLongText());
-        }
-
-        if (echo) {
-            sendAction(ctx.channel().id().asLongText(), action);
+        } finally {
+            in.release();
         }
     }
 

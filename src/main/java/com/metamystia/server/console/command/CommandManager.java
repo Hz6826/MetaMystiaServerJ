@@ -3,7 +3,7 @@ package com.metamystia.server.console.command;
 import com.metamystia.server.network.GameServer;
 import com.metamystia.server.network.actions.ReadyAction;
 import com.metamystia.server.network.actions.SelectAction;
-import com.metamystia.server.network.handlers.MainPacketHandler;
+import com.metamystia.server.util.DebugUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -25,7 +25,7 @@ public class CommandManager {
 
     private CommandManager() {
         this.dispatcher.register(
-                literal("debug")
+                literal("debug").requires(commandSource -> DebugUtils.debug)
                         .then(literal("help").executes(context -> {
                             context.getSource().user().sendMessage("Hello, world!");
                             log.info("Help command executed.");
@@ -48,8 +48,8 @@ public class CommandManager {
                                             return 1;
                         }))))
                         .then(literal("switchEcho").executes(context -> {
-                            MainPacketHandler.echo = !MainPacketHandler.echo;
-                            context.getSource().user().sendMessage("Echo mode switched to: " + MainPacketHandler.echo);
+                            DebugUtils.echo = !DebugUtils.echo;
+                            context.getSource().user().sendMessage("Echo mode switched to: " + DebugUtils.echo);
                             return 1;
                         }))
 
