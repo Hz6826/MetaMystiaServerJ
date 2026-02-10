@@ -22,9 +22,11 @@ public class CommandManager {
 
     public static void init() {
         dispatcher.register(
+                literal("help").executes(DebugCommands::helpCommandNoArgs)
+                        .then(argument("command", StringArgumentType.greedyString()).executes(DebugCommands::helpCommand))
+        );
+        dispatcher.register(
                 literal("debug").requires(commandSource -> DebugUtils.debug)
-                        .then(literal("help").executes(DebugCommands::helpCommandNoArgs)
-                                .then(argument("command", StringArgumentType.greedyString()).executes(DebugCommands::helpCommand)))
                         .then(literal("stop").executes(DebugCommands::stopCommand))
                         .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
                         .then(literal("sendSelect")

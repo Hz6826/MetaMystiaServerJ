@@ -55,9 +55,6 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
             if (DebugUtils.echo) {
                 sendAction(channelId, action);
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            ctx.close();
         } finally {
             in.release();
         }
@@ -66,7 +63,11 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error(cause.getMessage(), cause);
-        closeWithReason(ctx.channel().id().asLongText(), cause.getMessage());
+        if(DebugUtils.debug) {
+            closeWithReason(ctx.channel().id().asLongText(), cause.getMessage());
+        } else {
+            closeWithReason(ctx.channel().id().asLongText(), "Server internal error occurred!");
+        }
         if(ctx.channel().isActive()) {
             ctx.close();  // just in case
         }
