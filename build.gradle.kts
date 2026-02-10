@@ -46,8 +46,8 @@ dependencies {
     compileOnly("com.google.auto.service:auto-service:1.1.1")
 
     // memory pack TODO: add memory pack repo to maven, and replace this local file reference
-    annotationProcessor(":memorypack:0.1.5")
-    implementation(":memorypack:0.1.5")
+    annotationProcessor(":memorypack:0.1.6")
+    implementation(":memorypack:0.1.6")
 
     annotationProcessor("org.slf4j:slf4j-api:1.7.30")
     annotationProcessor("org.slf4j:slf4j-simple:1.7.30")
