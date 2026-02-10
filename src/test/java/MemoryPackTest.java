@@ -1,8 +1,14 @@
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
+import com.metamystia.server.core.gamedata.CookerSlot;
 import com.metamystia.server.core.gamedata.Scene;
+import com.metamystia.server.core.gamedata.Table;
+import com.metamystia.server.core.gamedata.generated.CookerSlotMemoryPackSerializer;
+import com.metamystia.server.core.gamedata.generated.TableMemoryPackSerializer;
 import com.metamystia.server.network.actions.HelloAction;
+import com.metamystia.server.network.actions.PrepAction;
 import com.metamystia.server.network.actions.generated.HelloActionMemoryPackSerializer;
+import com.metamystia.server.network.actions.generated.PrepActionMemoryPackSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
@@ -46,5 +52,23 @@ public class MemoryPackTest {
         }
         HelloAction deserializedHelloAction = SerializerRegistry.getInstance().getSerializer(HelloAction.class).deserialize(buffer);
         System.out.println(deserializedHelloAction);
+    }
+
+    @Test
+    public void test3() {
+        SerializerRegistry.getInstance().register(PrepAction.class, new PrepActionMemoryPackSerializer());
+        SerializerRegistry.getInstance().register(Table.class, new TableMemoryPackSerializer());
+        SerializerRegistry.getInstance().register(CookerSlot.class, new CookerSlotMemoryPackSerializer());
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+        try (InputStream in = HelloAction.class.getClassLoader().getResourceAsStream("test2.dat")){
+            Assertions.assertNotNull(in);
+            buffer.writeBytes(in.readAllBytes());
+            buffer.skipBytes(10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        PrepAction deserializedPrepAction = SerializerRegistry.getInstance().getSerializer(PrepAction.class).deserialize(buffer);
+
+        System.out.println(deserializedPrepAction);
     }
 }
