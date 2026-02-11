@@ -13,10 +13,10 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestSpawnAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_SPAWN;
+    private ActionType type = ActionType.GUEST_SPAWN;
 
-    public GuestInfo guestInfo;
-    public String uuid;
+    private GuestInfo guestInfo;
+    private String uuid;
 
     @Override
     public void onReceivedDerived(String channelId) {

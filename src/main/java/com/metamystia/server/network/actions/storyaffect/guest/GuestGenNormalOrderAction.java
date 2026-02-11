@@ -13,11 +13,11 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestGenNormalOrderAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_GEN_NORMAL_ORDER;
+    private ActionType type = ActionType.GUEST_GEN_NORMAL_ORDER;
 
-    public String guestUUID;
-    public GuestOrder order;
-    public String message;
+    private String guestUUID;
+    private GuestOrder order;
+    private String message;
 
     @Override
     public void onReceivedDerived(String channelId) {

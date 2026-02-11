@@ -11,9 +11,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class SceneTransitAction extends AbstractNetAction{
-    public ActionType type = ActionType.SCENE_TRANSIT;
+    private ActionType type = ActionType.SCENE_TRANSIT;
 
-    public Scene scene;
+    private Scene scene;
 
     @Override
     public void onReceivedDerived(String channelId) {

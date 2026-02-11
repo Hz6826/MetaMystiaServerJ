@@ -12,10 +12,10 @@ import lombok.ToString;
 @MemoryPackable
 @NoArgsConstructor
 public class ReadyAction extends AbstractNetAction{
-    public ActionType type = ActionType.READY;
+    private ActionType type = ActionType.READY;
 
-    public ReadyType readyType;
-    public boolean allReady = false;
+    private ReadyType readyType;
+    private boolean allReady = false;
 
     public ReadyAction(ReadyType readyType, boolean allReady) {
         super();

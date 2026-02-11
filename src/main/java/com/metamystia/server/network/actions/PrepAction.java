@@ -11,9 +11,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class PrepAction extends AbstractNetAction{
-    public ActionType type = ActionType.PREP;
+    private ActionType type = ActionType.PREP;
 
-    public Table prepTable;
+    private Table prepTable;
 
     @Override
     public void onReceivedDerived(String channelId) {

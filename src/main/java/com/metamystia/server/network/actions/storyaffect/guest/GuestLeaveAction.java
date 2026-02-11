@@ -12,7 +12,7 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestLeaveAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_LEAVE;
+    private ActionType type = ActionType.GUEST_LEAVE;
 
     public enum LeaveType {
         PayAndLeave,            // Host only
@@ -26,8 +26,8 @@ public class GuestLeaveAction extends SendAffectStoryAction {
         // FIXME: Any other leave method?
     }
 
-    public String guestUUID;
-    public LeaveType lType;
+    private String guestUUID;
+    private LeaveType lType;
 
     @Override
     public void onReceivedDerived(String channelId) {

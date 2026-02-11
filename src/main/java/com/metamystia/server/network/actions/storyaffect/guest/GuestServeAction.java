@@ -13,7 +13,7 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestServeAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_SERVE;
+    private ActionType type = ActionType.GUEST_SERVE;
 
     public enum ServeType {
         FOOD,
@@ -21,10 +21,10 @@ public class GuestServeAction extends SendAffectStoryAction {
         BOTH
     }
 
-    public String guestUUID;
-    public SellableFood food;
-    public int beverageId;
-    public ServeType foodType;
+    private String guestUUID;
+    private SellableFood food;
+    private int beverageId;
+    private ServeType foodType;
 
     @Override
     public void onReceivedDerived(String channelId) {

@@ -11,10 +11,10 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class QTEAction extends AffectStoryAction{
-    public ActionType type = ActionType.QTE;
+    private ActionType type = ActionType.QTE;
 
-    public int gridIndex;
-    public float QTEScore;
+    private int gridIndex;
+    private float QTEScore;
 
     @Override
     public void onReceivedDerived(String channelId) {

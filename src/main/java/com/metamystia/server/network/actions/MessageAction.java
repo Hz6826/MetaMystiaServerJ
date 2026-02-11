@@ -18,11 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 @MemoryPackable
 @NoArgsConstructor
 public class MessageAction extends AbstractNetAction {
-    public ActionType type = ActionType.MESSAGE;
+    private ActionType type = ActionType.MESSAGE;
 
     private static final int MAX_MESSAGE_LEN = 1024;
 
-    public String message;
+    private String message;
 
     public MessageAction(String message) {
         super();
@@ -32,7 +32,7 @@ public class MessageAction extends AbstractNetAction {
     @Override
     public void onReceivedDerived(String channelId) {
         if (message.startsWith(CommandManager.COMMAND_PREFIX)) {
-            CommandManager.parse(message, new CommandSource(User.getUserById(getSenderId()), getTimestampMs()));
+            CommandManager.parse(message, new CommandSource(User.getUserById(getSenderId()).orElseThrow(), getTimestampMs()));
         }
     }
 }

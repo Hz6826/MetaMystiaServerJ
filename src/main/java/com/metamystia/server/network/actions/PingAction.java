@@ -12,9 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 @MemoryPackable
 @Slf4j
 public class PingAction extends AbstractNetAction{
-    public ActionType type = ActionType.PING;
+    private ActionType type = ActionType.PING;
 
-    public int id;
+    private int id;
 
     @Override
     protected void logActionReceived() {

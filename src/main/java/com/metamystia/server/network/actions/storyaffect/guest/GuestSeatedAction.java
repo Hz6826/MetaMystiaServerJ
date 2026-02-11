@@ -12,12 +12,12 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestSeatedAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_SEATED;
+    private ActionType type = ActionType.GUEST_SEATED;
 
-    public String guestUUID;
-    public int deskId;
-    public int seatId;
-    public boolean firstSpawn;
+    private String guestUUID;
+    private int deskId;
+    private int seatId;
+    private boolean firstSpawn;
 
     @Override
     public void onReceivedDerived(String channelId) {

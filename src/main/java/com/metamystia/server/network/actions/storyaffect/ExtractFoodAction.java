@@ -12,8 +12,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class ExtractFoodAction extends AffectStoryAction{
-    public ActionType type = ActionType.EXTRACT_FOOD;
-    public SellableFood food;
+    private ActionType type = ActionType.EXTRACT_FOOD;
+
+    private SellableFood food;
 
     @Override
     public void onReceivedDerived(String channelId) {

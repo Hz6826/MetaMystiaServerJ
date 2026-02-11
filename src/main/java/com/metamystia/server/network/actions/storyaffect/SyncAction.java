@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @MemoryPackable
 public class SyncAction extends AffectStoryAction{
-    public ActionType type = ActionType.SYNC;
+    private ActionType type = ActionType.SYNC;
 
-    public float vx;
-    public float vy;
-    public float px;
-    public float py;
-    public boolean isSprinting;
-    public String mapLabel;
+    private float vx;
+    private float vy;
+    private float px;
+    private float py;
+    private boolean isSprinting;
+    private String mapLabel;
 
     @Override
     protected void logActionReceived() {

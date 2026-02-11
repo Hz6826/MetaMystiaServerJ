@@ -11,9 +11,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class ExtractAction extends AffectStoryAction{
-    public ActionType type = ActionType.EXTRACT;
+    private ActionType type = ActionType.EXTRACT;
 
-    public int gridIndex;
+    private int gridIndex;
 
     @Override
     public void onReceivedDerived(String channelId) {

@@ -12,12 +12,12 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class CookAction extends AffectStoryAction{
-    public ActionType type = ActionType.COOK;
+    private ActionType type = ActionType.COOK;
 
-    public int gridIndex;
-    public int recipeId;
+    private int gridIndex;
+    private int recipeId;
 
-    public SellableFood food;
+    private SellableFood food;
 
     @Override
     public void onReceivedDerived(String channelId) {

@@ -12,10 +12,10 @@ import lombok.ToString;
 @MemoryPackable
 @NoArgsConstructor
 public class SelectAction extends AbstractNetAction{
-    public ActionType type = ActionType.SELECT;
+    private ActionType type = ActionType.SELECT;
 
-    public String mapLabel = "";
-    public int mapLevel = 0;
+    private String mapLabel = "";
+    private int mapLevel = 0;
 
     public SelectAction(String mapLabel, int mapLevel) {
         super();

@@ -22,20 +22,20 @@ import java.util.Set;
 @MemoryPackable
 @NoArgsConstructor
 public class HelloAction extends AbstractNetAction{
-    public ActionType type = ActionType.HELLO;
+    private ActionType type = ActionType.HELLO;
 
-    public String peerId = "";
-    public String version = "";
-    public String gameVersion = "";
-    public Scene currentGameScene;
+    private String peerId = "";
+    private String version = "";
+    private String gameVersion = "";
+    private Scene currentGameScene;
 
-    public List<String> peerActiveDLCLabel;
-    public Set<Integer> peerDLCRecipes;
-    public Set<Integer> peerDLCCookers;
-    public Set<Integer> peerDLCFoods;
-    public Set<Integer> peerDLCBeverages;
-    public Set<Integer> peerDLCNormalGuests;
-    public Set<Integer> peerDLCSpecialGuests;
+    private List<String> peerActiveDLCLabel;
+    private Set<Integer> peerDLCRecipes;
+    private Set<Integer> peerDLCCookers;
+    private Set<Integer> peerDLCFoods;
+    private Set<Integer> peerDLCBeverages;
+    private Set<Integer> peerDLCNormalGuests;
+    private Set<Integer> peerDLCSpecialGuests;
 
     public HelloAction(String peerId, String version, String gameVersion, Scene currentGameScene, List<String> peerActiveDLCLabel, Set<Integer> peerDLCRecipes, Set<Integer> peerDLCCookers, Set<Integer> peerDLCFoods, Set<Integer> peerDLCBeverages, Set<Integer> peerDLCNormalGuests, Set<Integer> peerDLCSpecialGuests) {
         this.peerId = peerId;

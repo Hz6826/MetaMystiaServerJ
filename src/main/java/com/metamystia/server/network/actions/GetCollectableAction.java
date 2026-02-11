@@ -10,9 +10,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GetCollectableAction extends AbstractNetAction{
-    public ActionType type = ActionType.GET_COLLECTABLE;
+    private ActionType type = ActionType.GET_COLLECTABLE;
 
-    public String Collectable;
+    private String Collectable;
 
     @Override
     public void onReceivedDerived(String channelId) {

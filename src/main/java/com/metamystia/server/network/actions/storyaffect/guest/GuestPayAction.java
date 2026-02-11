@@ -14,7 +14,7 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class GuestPayAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_PAY;
+    private ActionType type = ActionType.GUEST_PAY;
 
     public enum GuestPayType {
         FUND,
@@ -22,18 +22,18 @@ public class GuestPayAction extends SendAffectStoryAction {
         COMBO
     }
 
-    public GuestPayType payType;
-    public int amount;
+    private GuestPayType payType;
+    private int amount;
 
     @MemoryPackAllowSerialize
-    public EventManager.ServeType serveType;
+    private EventManager.ServeType serveType;
 
     @MemoryPackAllowSerialize
-    public EventManager.MathOperation mathOperation;
+    private EventManager.MathOperation mathOperation;
 
-    public float ComboBuff;
-    public float MoodBuff;
-    public float ExtraBuff;
+    private float ComboBuff;
+    private float MoodBuff;
+    private float ExtraBuff;
 
     @Override
     public void onReceivedDerived(String channelId) {

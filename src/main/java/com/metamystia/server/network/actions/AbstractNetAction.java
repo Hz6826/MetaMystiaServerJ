@@ -14,11 +14,9 @@ import java.time.Instant;
 @Slf4j(topic = "Network")
 @MemoryPackable
 public abstract class AbstractNetAction {
-    @Getter @Setter @ToString.Exclude
-    public ActionType type = null;
-    @Getter @Setter
+    @ToString.Exclude
+    private ActionType type = null;
     private long timestampMs;
-    @Getter @Setter
     private long senderId;
 
     protected AbstractNetAction() {

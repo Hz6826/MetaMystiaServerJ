@@ -13,10 +13,10 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class MapDecidedAction extends AbstractNetAction{
-    public ActionType type = ActionType.MAP_DECIDED;
+    private ActionType type = ActionType.MAP_DECIDED;
 
-    public String mapLabel = "";
-    public int level = 0;
+    private String mapLabel = "";
+    private int level = 0;
 
     @Override
     public void onReceivedDerived(String channelId) {

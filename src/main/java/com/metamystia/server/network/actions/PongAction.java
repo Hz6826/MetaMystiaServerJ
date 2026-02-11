@@ -10,9 +10,9 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class PongAction extends AbstractNetAction{
-    public ActionType type = ActionType.PONG;
+    private ActionType type = ActionType.PONG;
 
-    public int id;
+    private int id;
 
     @Override
     public void onReceivedDerived(String channelId) {

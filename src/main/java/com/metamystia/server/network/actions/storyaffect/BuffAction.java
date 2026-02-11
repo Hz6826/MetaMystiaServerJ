@@ -27,9 +27,9 @@ public class BuffAction extends AffectStoryAction{
 
         private final int value;
     }
-    public ActionType type = ActionType.BUFF;
+    private final ActionType type = ActionType.BUFF;
 
-    public QTEBuff buff;
+    private QTEBuff buff;
 
     @Override
     public void onReceivedDerived(String channelId) {

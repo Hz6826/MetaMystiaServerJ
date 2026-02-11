@@ -14,9 +14,9 @@ import java.util.List;
 @Data
 @MemoryPackable
 public class GuestInviteAction extends SendAffectStoryAction {
-    public ActionType type = ActionType.GUEST_INVITE;
+    private ActionType type = ActionType.GUEST_INVITE;
 
-    public List<Integer> invitedGuestIDs;
+    private List<Integer> invitedGuestIDs;
 
     @Override
     public void onReceivedDerived(String channelId) {

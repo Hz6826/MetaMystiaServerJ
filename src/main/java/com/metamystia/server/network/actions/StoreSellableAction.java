@@ -11,17 +11,17 @@ import lombok.ToString;
 @Data
 @MemoryPackable
 public class StoreSellableAction extends AbstractNetAction{
-    public ActionType type = ActionType.STORE_SELLABLE;
+    private ActionType type = ActionType.STORE_SELLABLE;
 
     public enum StoreType {
         Food,
         Beverage
     }
 
-    public int gridIndex;
-    public SellableFood sellableFood;
-    public int beverageId;
-    public StoreType foodType;
+    private int gridIndex;
+    private SellableFood sellableFood;
+    private int beverageId;
+    private StoreType foodType;
 
     @Override
     public void onReceivedDerived(String channelId) {
