@@ -1,5 +1,7 @@
 package com.metamystia.server.network;
 
+import com.metamystia.server.console.command.CommandManager;
+import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.network.handlers.DebugInboundHandler;
 import com.metamystia.server.network.handlers.DebugOutboundHandler;
 import com.metamystia.server.network.handlers.MainPacketHandler;
@@ -44,7 +46,7 @@ public class GameServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
+                        public void initChannel(SocketChannel ch){
                             ChannelPipeline p = ch.pipeline();
 
                             p.addLast(new DebugInboundHandler());
@@ -72,6 +74,9 @@ public class GameServer {
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+
+            CommandManager.shutdown();
+            RoomManager.shutdown();
             log.info("Game server stopped");
         }
     }

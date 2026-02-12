@@ -12,8 +12,7 @@ import lombok.ToString;
 public class IzakayaCloseAction extends AbstractNetAction{
     private ActionType type = ActionType.IZAKAYA_CLOSE;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
-
+    public IzakayaCloseAction() {
+        super();
     }
 }

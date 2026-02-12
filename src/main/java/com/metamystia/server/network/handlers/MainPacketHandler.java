@@ -2,11 +2,13 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
-import com.metamystia.server.core.room.User;
+import com.metamystia.server.core.packet.PacketDispatcher;
+import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
 import com.metamystia.server.network.actions.MessageAction;
 import com.metamystia.server.util.DebugUtils;
+import com.metamystia.server.util.NetworkUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -48,9 +50,9 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
             AbstractNetAction action = serializer.deserialize(in);
 
-            String channelId = ctx.channel().id().asLongText();
+            String channelId = NetworkUtils.getChannelId(ctx);
 
-            action.onReceived(channelId);
+            PacketDispatcher.dispatch(channelId, action);
 
             if (DebugUtils.echo) {
                 sendAction(channelId, action);
@@ -64,9 +66,9 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error(cause.getMessage(), cause);
         if(DebugUtils.debug) {
-            closeWithReason(ctx.channel().id().asLongText(), cause.getMessage());
+            closeWithReason(NetworkUtils.getChannelId(ctx), cause.getMessage());
         } else {
-            closeWithReason(ctx.channel().id().asLongText(), "Server internal error occurred!");
+            closeWithReason(NetworkUtils.getChannelId(ctx), "Server internal error occurred!");
         }
         if(ctx.channel().isActive()) {
             ctx.close();  // just in case
@@ -76,15 +78,21 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         log.info("New connection from {}", ctx.channel().remoteAddress());
-        channels.put(ctx.channel().id().asLongText(), ctx.channel());
+        channels.put(NetworkUtils.getChannelId(ctx), ctx.channel());
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.info("Connection closed from {}", ctx.channel().remoteAddress());
-        User.removeUser(User.getUserByChannelId(ctx.channel().id().asLongText()));
-        channels.remove(ctx.channel().id().asLongText());
+        User.getUserByChannelId(NetworkUtils.getChannelId(ctx)).ifPresentOrElse(
+                user -> {
+                    user.getRoom().ifPresent(room -> room.removeUser(user));
+                    User.removeUser(user);
+                },
+                () -> log.warn("User not found for channel {}", NetworkUtils.getChannelId(ctx))
+        );
+        channels.remove(NetworkUtils.getChannelId(ctx));
         super.channelInactive(ctx);
     }
 

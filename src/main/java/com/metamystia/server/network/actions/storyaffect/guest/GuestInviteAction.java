@@ -18,8 +18,12 @@ public class GuestInviteAction extends SendAffectStoryAction {
 
     private List<Integer> invitedGuestIDs;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestInviteAction(List<Integer> invitedGuestIDs) {
+        super();
+        this.invitedGuestIDs = invitedGuestIDs;
+    }
 
+    public GuestInviteAction() {
+        super();
     }
 }

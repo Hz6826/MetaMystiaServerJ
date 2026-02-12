@@ -29,8 +29,13 @@ public class GuestLeaveAction extends SendAffectStoryAction {
     private String guestUUID;
     private LeaveType lType;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestLeaveAction() {
+        super();
+    }
 
+    public GuestLeaveAction(String guestUUID, LeaveType lType) {
+        super();
+        this.guestUUID = guestUUID;
+        this.lType = lType;
     }
 }

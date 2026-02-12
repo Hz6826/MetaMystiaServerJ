@@ -2,8 +2,11 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
+import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
+import com.metamystia.server.util.LogLevel;
+import com.metamystia.server.util.NetworkUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -43,7 +46,16 @@ public class OutboundPacketHandler extends ChannelOutboundHandlerAdapter {
 
         super.write(ctx, out, promise);
 
-        log.info("Sent [{}] - {}", actionType, action);
+        LogLevel logLevel = action.getLogLevel();
+        if (logLevel == LogLevel.DEBUG) {
+            log.debug("Sent [{}] to {} - {}", actionType, User.getUserOrChannelIdString(NetworkUtils.getChannelId(ctx)), action);
+        } else if (logLevel == LogLevel.INFO) {
+            log.info("Sent [{}] to {} - {}", actionType, User.getUserOrChannelIdString(NetworkUtils.getChannelId(ctx)), action);
+        } else if (logLevel == LogLevel.WARN) {
+            log.warn("Sent [{}] to {} - {}", actionType, User.getUserOrChannelIdString(NetworkUtils.getChannelId(ctx)), action);
+        } else if (logLevel == LogLevel.ERROR) {
+            log.error("Sent [{}] to {} - {}", actionType, User.getUserOrChannelIdString(NetworkUtils.getChannelId(ctx)), action);
+        }
     }
 
     private <T extends AbstractNetAction> void serializeAction(

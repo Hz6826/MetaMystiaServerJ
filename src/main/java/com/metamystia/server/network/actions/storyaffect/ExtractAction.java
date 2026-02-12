@@ -15,8 +15,12 @@ public class ExtractAction extends AffectStoryAction{
 
     private int gridIndex;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public ExtractAction() {
+        super();
+    }
 
+    public ExtractAction(int gridIndex) {
+        super();
+        this.gridIndex = gridIndex;
     }
 }

@@ -14,8 +14,12 @@ public class GetCollectableAction extends AbstractNetAction{
 
     private String Collectable;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GetCollectableAction() {
+        super();
+    }
 
+    public GetCollectableAction(String Collectable) {
+        super();
+        this.Collectable = Collectable;
     }
 }

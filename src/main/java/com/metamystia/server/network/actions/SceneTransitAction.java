@@ -15,8 +15,12 @@ public class SceneTransitAction extends AbstractNetAction{
 
     private Scene scene;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public SceneTransitAction() {
+        super();
+    }
 
+    public SceneTransitAction(Scene scene) {
+        super();
+        this.scene = scene;
     }
 }

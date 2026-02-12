@@ -35,8 +35,17 @@ public class GuestPayAction extends SendAffectStoryAction {
     private float MoodBuff;
     private float ExtraBuff;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestPayAction() {
+        super();
+    }
 
+    public GuestPayAction(GuestPayType payType, int amount, EventManager.ServeType serveType, EventManager.MathOperation mathOperation, float ComboBuff, float MoodBuff, float ExtraBuff) {
+        super();
+        this.payType = payType;
+        this.amount = amount;
+        this.serveType = serveType;
+        this.mathOperation = mathOperation;
+        this.ComboBuff = ComboBuff;
+        this.MoodBuff = MoodBuff;
     }
 }

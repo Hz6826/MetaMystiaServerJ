@@ -23,8 +23,13 @@ public class StoreSellableAction extends AbstractNetAction{
     private int beverageId;
     private StoreType foodType;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public StoreSellableAction() {
+        super();
+    }
 
+    public StoreSellableAction(int gridIndex, SellableFood sellableFood) {
+        super();
+        this.gridIndex = gridIndex;
+        this.sellableFood = sellableFood;
     }
 }

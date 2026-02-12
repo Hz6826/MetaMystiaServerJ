@@ -1,14 +1,15 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.Main;
 import com.metamystia.server.core.gamedata.Scene;
-import com.metamystia.server.core.room.User;
+import com.metamystia.server.core.room.RoomManager;
+import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.handlers.MainPacketHandler;
 import com.metamystia.server.util.ManifestManager;
 import com.metamystia.server.util.VersionValidators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,6 @@ import java.util.Set;
 @ToString(callSuper = true)
 @Data
 @MemoryPackable
-@NoArgsConstructor
 public class HelloAction extends AbstractNetAction{
     private ActionType type = ActionType.HELLO;
 
@@ -37,7 +37,13 @@ public class HelloAction extends AbstractNetAction{
     private Set<Integer> peerDLCNormalGuests;
     private Set<Integer> peerDLCSpecialGuests;
 
+    public HelloAction() {
+        super();
+    }
+
     public HelloAction(String peerId, String version, String gameVersion, Scene currentGameScene, List<String> peerActiveDLCLabel, Set<Integer> peerDLCRecipes, Set<Integer> peerDLCCookers, Set<Integer> peerDLCFoods, Set<Integer> peerDLCBeverages, Set<Integer> peerDLCNormalGuests, Set<Integer> peerDLCSpecialGuests) {
+        super();
+
         this.peerId = peerId;
         this.version = version;
         this.gameVersion = gameVersion;
@@ -53,13 +59,33 @@ public class HelloAction extends AbstractNetAction{
     }
 
     @Override
-    public void onReceivedDerived(String channelId) {
-        User.createUser(this, channelId);  // to avoid no user found in MainPacketHandler.channelInactive method
+    public boolean onReceivedDerived(String channelId) {
+        User user = User.createUser(this, channelId);  // to avoid no user found in MainPacketHandler.channelInactive method
         if (!VersionValidators.isMetaMystiaVersionValid(this.getVersion())) {
             MainPacketHandler.closeWithReason(channelId, "Invalid version! Supported version(s): " + ManifestManager.getManifest().metaMystiaVersion());
-            return;
+            return true;
+        }
+        HelloAction copy = new HelloAction(
+                Main.SERVER_NAME,
+                this.getVersion(),
+                this.getGameVersion(),
+                this.getCurrentGameScene(),
+
+                this.getPeerActiveDLCLabel(),
+                this.getPeerDLCRecipes(),
+                this.getPeerDLCCookers(),
+                this.getPeerDLCFoods(),
+                this.getPeerDLCBeverages(),
+                this.getPeerDLCNormalGuests(),
+                this.getPeerDLCSpecialGuests()
+        );  // TODO
+
+        user.sendAction(copy);
+        if (user.getRoom().isEmpty()) {
+            RoomManager.getLobbyRoom().addUser(user);
         }
 
         log.info("User registered: {}, channel: {}", this.getSenderId(), channelId);
+        return false;
     }
 }

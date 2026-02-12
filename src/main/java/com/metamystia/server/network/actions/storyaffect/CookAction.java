@@ -19,8 +19,14 @@ public class CookAction extends AffectStoryAction{
 
     private SellableFood food;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public CookAction() {
+        super();
+    }
 
+    public CookAction(int gridIndex, int recipeId, SellableFood food) {
+        super();
+        this.gridIndex = gridIndex;
+        this.recipeId = recipeId;
+        this.food = food;
     }
 }

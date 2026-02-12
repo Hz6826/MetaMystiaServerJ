@@ -31,8 +31,12 @@ public class BuffAction extends AffectStoryAction{
 
     private QTEBuff buff;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public BuffAction() {
+        super();
+    }
 
+    public BuffAction(QTEBuff buff) {
+        super();
+        this.buff = buff;
     }
 }

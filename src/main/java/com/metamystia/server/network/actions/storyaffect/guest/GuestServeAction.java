@@ -26,8 +26,15 @@ public class GuestServeAction extends SendAffectStoryAction {
     private int beverageId;
     private ServeType foodType;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestServeAction() {
+        super();
+    }
 
+    public GuestServeAction(String guestUUID, SellableFood food, int beverageId, ServeType foodType) {
+        super();
+        this.guestUUID = guestUUID;
+        this.food = food;
+        this.beverageId = beverageId;
+        this.foodType = foodType;
     }
 }

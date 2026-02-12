@@ -18,8 +18,12 @@ public class GuestSpawnAction extends SendAffectStoryAction {
     private GuestInfo guestInfo;
     private String uuid;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestSpawnAction() {
+        this.guestInfo = new GuestInfo();
+    }
 
+    public GuestSpawnAction(GuestInfo guestInfo, String uuid) {
+        this.guestInfo = guestInfo;
+        this.uuid = uuid;
     }
 }

@@ -1,7 +1,9 @@
 package com.metamystia.server.network.actions.storyaffect;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.ActionType;
+import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -20,13 +22,28 @@ public class NightSyncAction extends AffectStoryAction{
     private float px;
     private float py;
 
-    @Override
-    protected void logActionReceived() {
-        log.debug("Received [{}] - {}", this.getType(), this);
+    public NightSyncAction() {
+        super();
+    }
+
+    public NightSyncAction(float vx, float vy, float px, float py) {
+        super();
+        this.vx = vx;
+        this.vy = vy;
+        this.px = px;
+        this.py = py;
     }
 
     @Override
-    public void onReceivedDerived(String channelId) {
+    public LogLevel getLogLevel() {
+        return LogLevel.DEBUG;
+    }
 
+    @Override
+    public boolean onReceivedDerived(String channelId) {
+        User.getUserByChannelId(channelId).ifPresent(
+                user -> user.getUserPos().updateFromNightSyncAction(this)
+        );
+        return false;
     }
 }

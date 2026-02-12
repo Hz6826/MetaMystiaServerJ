@@ -16,8 +16,13 @@ public class QTEAction extends AffectStoryAction{
     private int gridIndex;
     private float QTEScore;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public QTEAction() {
+        super();
+    }
 
+    public QTEAction(int gridIndex, float QTEScore) {
+        super();
+        this.gridIndex = gridIndex;
+        this.QTEScore = QTEScore;
     }
 }

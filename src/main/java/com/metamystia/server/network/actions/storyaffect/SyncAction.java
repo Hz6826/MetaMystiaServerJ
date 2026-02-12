@@ -1,7 +1,9 @@
 package com.metamystia.server.network.actions.storyaffect;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.ActionType;
+import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,13 +24,30 @@ public class SyncAction extends AffectStoryAction{
     private boolean isSprinting;
     private String mapLabel;
 
-    @Override
-    protected void logActionReceived() {
-        log.debug("Received [{}] - {}", this.getType(), this);
+    public SyncAction() {
+        super();
+    }
+
+    public SyncAction(float vx, float vy, float px, float py, boolean isSprinting, String mapLabel) {
+        super();
+        this.vx = vx;
+        this.vy = vy;
+        this.px = px;
+        this.py = py;
+        this.isSprinting = isSprinting;
+        this.mapLabel = mapLabel;
     }
 
     @Override
-    public void onReceivedDerived(String channelId) {
+    public LogLevel getLogLevel() {
+        return LogLevel.DEBUG;
+    }
 
+    @Override
+    public boolean onReceivedDerived(String channelId) {
+        User.getUserByChannelId(channelId).ifPresent(
+                user -> user.getUserPos().updateFromSyncAction(this)
+        );
+        return false;
     }
 }

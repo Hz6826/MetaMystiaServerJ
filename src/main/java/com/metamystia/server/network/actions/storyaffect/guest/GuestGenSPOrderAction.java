@@ -19,8 +19,14 @@ public class GuestGenSPOrderAction extends SendAffectStoryAction {
     private GuestOrder order;
     private String message;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestGenSPOrderAction() {
+        super();
+    }
 
+    public GuestGenSPOrderAction(String guestUUID, GuestOrder order, String message) {
+        super();
+        this.guestUUID = guestUUID;
+        this.order = order;
+        this.message = message;
     }
 }

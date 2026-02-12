@@ -1,6 +1,8 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.core.user.User;
+import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -16,13 +18,26 @@ public class PingAction extends AbstractNetAction{
 
     private int id;
 
-    @Override
-    protected void logActionReceived() {
-        log.debug("Received [{}] - {}", this.getType(), this);
+    public PingAction() {
+        super();
+    }
+
+    public PingAction(int id) {
+        super();
+        this.id = id;
     }
 
     @Override
-    public void onReceivedDerived(String channelId) {
+    public LogLevel getLogLevel() {
+        return LogLevel.DEBUG;
+    }
 
+    @Override
+    public boolean onReceivedDerived(String channelId) {
+        User.getUserByChannelId(channelId).ifPresent(user -> {
+            user.setLatency(System.currentTimeMillis() - this.getTimestampMs());
+            user.sendAction(new PongAction(this.id));
+        });
+        return true;
     }
 }

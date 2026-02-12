@@ -1,6 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,8 +15,16 @@ public class PongAction extends AbstractNetAction{
 
     private int id;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public PongAction() {
+        super();
+    }
 
+    public PongAction(int id) {
+        super();
+        this.id = id;
+    }
+
+    public LogLevel getLogLevel() {
+        return LogLevel.DEBUG;
     }
 }

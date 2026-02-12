@@ -1,49 +1,44 @@
 package com.metamystia.server.console.command;
 
-import com.metamystia.server.util.DebugUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class CommandManager {
     public static final String COMMAND_PREFIX = "!";
-    private static final Map<String, ParseResults<CommandSource>> PARSE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ParseResults<CommandSource>> PARSE_CACHE = new ConcurrentHashMap<>();  // FIXME
+    public static final boolean ENABLE_CACHE = false;
 
     public static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
 
+    private static final ExecutorService commandExecutor =
+            Executors.newFixedThreadPool(2, r -> {
+                Thread t = new Thread(r, "Command-Worker");
+                t.setDaemon(true);
+                return t;
+            });
+
     public static void init() {
-        dispatcher.register(
-                literal("help").executes(DebugCommands::helpCommandNoArgs)
-                        .then(argument("command", StringArgumentType.greedyString()).executes(DebugCommands::helpCommand))
-        );
-        dispatcher.register(
-                literal("debug").requires(commandSource -> DebugUtils.debug)
-                        .then(literal("stop").executes(DebugCommands::stopCommand))
-                        .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
-                        .then(literal("sendSelect")
-                                .then(argument("mapLabel", StringArgumentType.word())
-                                        .then(argument("mapLevel", IntegerArgumentType.integer(1, 3))
-                                                .executes(DebugCommands::sendSelectCommand))))
-                        .then(literal("closeWithReason")
-                                .then(argument("reason", StringArgumentType.greedyString()).executes(DebugCommands::closeWithReasonCommand)))
-                        .then(literal("switchEcho").executes(DebugCommands::switchEchoCommand))
-        );
+        DebugCommands.register(dispatcher);
+        RoomCommands.register(dispatcher);
+
     }
 
-    public static void parse(String command, CommandSource source){
+    private static void parse(String command, CommandSource source){
         if(command.startsWith(COMMAND_PREFIX)) command = command.substring(1);
         try {
             ParseResults<CommandSource> parseResults;
-            if(PARSE_CACHE.containsKey(command)) {
+
+            if(ENABLE_CACHE && PARSE_CACHE.containsKey(command)) {
                 parseResults = PARSE_CACHE.get(command);
             } else {
                 parseResults = dispatcher.parse(command, source);
@@ -51,13 +46,21 @@ public class CommandManager {
             }
             dispatcher.execute(parseResults);
         } catch (Exception e) {
-            log.error("Failed to parse command: {} from {}", command, source.user(), e);
+            log.error("Failed to parse command: \"{}{}\" from {}", COMMAND_PREFIX, command, source.user(), e);
             source.user().sendMessage("Failed to parse command: " + e.getMessage());
         }
     }
 
+    public static void parseAsync(String command, CommandSource source) {
+        commandExecutor.submit(() -> parse(command, source));
+    }
+
     public static void clearCache() {
         PARSE_CACHE.clear();
+    }
+
+    public static void shutdown() {
+        commandExecutor.shutdown();
     }
 
     public static LiteralArgumentBuilder<CommandSource> literal(final String literal) {

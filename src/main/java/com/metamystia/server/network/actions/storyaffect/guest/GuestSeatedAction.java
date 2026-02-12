@@ -19,8 +19,15 @@ public class GuestSeatedAction extends SendAffectStoryAction {
     private int seatId;
     private boolean firstSpawn;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public GuestSeatedAction() {
+        super();
+    }
 
+    public GuestSeatedAction(String guestUUID, int deskId, int seatId, boolean firstSpawn) {
+        super();
+        this.guestUUID = guestUUID;
+        this.deskId = deskId;
+        this.seatId = seatId;
+        this.firstSpawn = firstSpawn;
     }
 }

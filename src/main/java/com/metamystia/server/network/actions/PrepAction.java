@@ -15,8 +15,12 @@ public class PrepAction extends AbstractNetAction{
 
     private Table prepTable;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public PrepAction() {
+        super();
+    }
 
+    public PrepAction(Table prepTable) {
+        super();
+        this.prepTable = prepTable;
     }
 }

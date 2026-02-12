@@ -16,8 +16,12 @@ public class ExtractFoodAction extends AffectStoryAction{
 
     private SellableFood food;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public ExtractFoodAction() {
+        super();
+    }
 
+    public ExtractFoodAction(SellableFood food) {
+        super();
+        this.food = food;
     }
 }

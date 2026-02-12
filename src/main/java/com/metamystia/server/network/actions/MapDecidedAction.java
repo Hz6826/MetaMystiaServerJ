@@ -18,8 +18,13 @@ public class MapDecidedAction extends AbstractNetAction{
     private String mapLabel = "";
     private int level = 0;
 
-    @Override
-    public void onReceivedDerived(String channelId) {
+    public MapDecidedAction() {
+        super();
+    }
 
+    public MapDecidedAction(String mapLabel, int level) {
+        super();
+        this.mapLabel = mapLabel;
+        this.level = level;
     }
 }

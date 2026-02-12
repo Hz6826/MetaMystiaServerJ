@@ -2,6 +2,7 @@ package com.metamystia.server;
 
 import com.hz6826.memorypack.util.MemoryPackInitializerWrapper;
 import com.metamystia.server.console.command.CommandManager;
+import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.network.GameServer;
 import com.metamystia.server.util.BootstrapTips;
 import com.metamystia.server.util.DebugUtils;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @Slf4j
 public class Main {
+    public static final String SERVER_NAME = "MetaMystiaServerJ";
+
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
         log.info("Starting MetaMystiaServerJ...");
@@ -39,6 +42,7 @@ public class Main {
 
         MemoryPackInitializerWrapper.registerAll();
         CommandManager.init();
+        RoomManager.init();
 
         try {
             GameServer.getInstance().run();
