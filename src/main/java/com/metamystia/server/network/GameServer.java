@@ -88,10 +88,17 @@ public class GameServer {
 
     private static GameServer INSTANCE;
 
-    public static synchronized GameServer getInstance() {
+    public static synchronized GameServer getInstance(int port) {
     	if (INSTANCE == null) {
-    		INSTANCE = new GameServer(40815);
+    		INSTANCE = new GameServer(port);
     	}
     	return INSTANCE;
+    }
+
+    public static GameServer getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException("GameServer not initialized");
+        }
+        return INSTANCE;
     }
 }

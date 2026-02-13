@@ -15,6 +15,7 @@ import java.util.List;
 @Slf4j
 public class Main {
     public static final String SERVER_NAME = "MetaMystiaServerJ";
+    public static final int DEFAULT_PORT = 40815;
 
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
@@ -40,12 +41,20 @@ public class Main {
             log.info("Hex dump enabled");
         }
 
+        int port = DEFAULT_PORT;
+        if (argsList.contains("--port")) {
+            port = Integer.parseInt(argsList.get(argsList.indexOf("--port") + 1));
+        }
+        if (argsList.contains("-p")) {
+            port = Integer.parseInt(argsList.get(argsList.indexOf("-p") + 1));
+        }
+
         MemoryPackInitializerWrapper.registerAll();
         CommandManager.init();
         RoomManager.init();
 
         try {
-            GameServer.getInstance().run();
+            GameServer.getInstance(port).run();
         } catch (Exception e) {
             log.error("Failed to start game server", e);
         }
