@@ -92,7 +92,7 @@ public class RoomManager {
     }
 
     private static String getInviteCodeString() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String chars = "ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789";  // no O or l
         int length = 6;
         int maxAttempts = 100;
         ThreadLocalRandom random = ThreadLocalRandom.current();

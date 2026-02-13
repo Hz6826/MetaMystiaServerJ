@@ -1,6 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.Main;
 import com.metamystia.server.console.command.CommandManager;
 import com.metamystia.server.console.command.CommandSource;
 import com.metamystia.server.core.user.User;
@@ -31,6 +32,12 @@ public class MessageAction extends AbstractNetAction {
         this.message = message;
     }
 
+    public static MessageAction ofServerMessage(String message) {
+        MessageAction messageAction = new MessageAction(message);
+        messageAction.addDecorator("[" + Main.SERVER_NAME + "] ");
+        return messageAction;
+    }
+
     @Override
     public boolean onReceivedDerived(String channelId) {
         if (message.startsWith(CommandManager.COMMAND_PREFIX)) {
@@ -38,8 +45,11 @@ public class MessageAction extends AbstractNetAction {
             return true;
         }
         this.message = message.substring(0, Math.min(message.length(), MAX_MESSAGE_LEN));
-        message = "[" + User.getUserOrChannelIdString(channelId) + "] " + message;
         return false;
 
+    }
+
+    public void addDecorator(String decorator) {
+        this.message = decorator + this.message;
     }
 }

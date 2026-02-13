@@ -43,7 +43,7 @@ public class DebugCommands {
         );
     }
 
-    public static int helpCommandNoArgs(CommandContext<CommandSource> context) {
+    private static int helpCommandNoArgs(CommandContext<CommandSource> context) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nAvailable commands:");
 
@@ -56,55 +56,55 @@ public class DebugCommands {
         return 1;
     }
 
-    public static int helpCommand(CommandContext<CommandSource> context) {
+    private static int helpCommand(CommandContext<CommandSource> context) {
         String command = StringArgumentType.getString(context, "command");
 
         context.getSource().user().sendMessage("Not implemented yet!");  // TODO
         return 1;
     }
 
-    public static int stopCommand(CommandContext<CommandSource> context) {
+    private static int stopCommand(CommandContext<CommandSource> context) {
         GameServer.getInstance().stop();
         return 1;
     }
 
-    public static int sendReadyCommand(CommandContext<CommandSource> context) {
+    private static int sendReadyCommand(CommandContext<CommandSource> context) {
         context.getSource().user().sendAction(new ReadyAction(ReadyAction.ReadyType.DayOver, true));
         return 1;
     }
 
-    public static int sendPrepReadyCommand(CommandContext<CommandSource> context) {
+    private static int sendPrepReadyCommand(CommandContext<CommandSource> context) {
         context.getSource().user().sendAction(new ReadyAction(ReadyAction.ReadyType.PrepOver, true));
         return 1;
     }
 
-    public static int sendSelectCommand(CommandContext<CommandSource> context) {
+    private static int sendSelectCommand(CommandContext<CommandSource> context) {
         String mapLabel = StringArgumentType.getString(context, "mapLabel");
         int mapLevel = IntegerArgumentType.getInteger(context, "mapLevel");
         context.getSource().user().sendAction(new SelectAction(mapLabel, mapLevel));
         return 1;
     }
 
-    public static int closeWithReasonCommand(CommandContext<CommandSource> context) {
+    private static int closeWithReasonCommand(CommandContext<CommandSource> context) {
         String reason = StringArgumentType.getString(context, "reason");
         context.getSource().user().closeWithReason(reason);
         return 1;
     }
 
-    public static int switchEchoCommand(CommandContext<CommandSource> context) {
+    private static int switchEchoCommand(CommandContext<CommandSource> context) {
         DebugUtils.echo = !DebugUtils.echo;
         context.getSource().user().sendMessage("Echo mode switched to: " + DebugUtils.echo);
         return 1;
     }
 
-    public static int setPermissionLevelCommand(CommandContext<CommandSource> context) {
+    private static int setPermissionLevelCommand(CommandContext<CommandSource> context) {
         PermissionLevel permissionLevel = PermissionLevelArgumentType.getPermissionLevel(context, "permissionLevel");
         context.getSource().user().setPermissionLevel(permissionLevel);
         context.getSource().user().sendMessage("Permission level set to: " + permissionLevel);
         return 1;
     }
 
-    public static int getPermissionLevelCommand(CommandContext<CommandSource> context) {
+    private static int getPermissionLevelCommand(CommandContext<CommandSource> context) {
         PermissionLevel permissionLevel = context.getSource().user().getPermissionLevel();
         context.getSource().user().sendMessage("Permission level: " + permissionLevel);
         return 1;

@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -29,6 +30,9 @@ public abstract class AbstractRoom {
 
     @Setter(AccessLevel.PROTECTED)
     private volatile boolean autoSetFirstUserAsOwner = true;
+
+    @Setter(AccessLevel.PROTECTED)
+    private volatile boolean broadcastHelloAction = false;
 
     @Setter(AccessLevel.PRIVATE)
     private List<Long> userIds = new ArrayList<>();
@@ -140,6 +144,10 @@ public abstract class AbstractRoom {
             this.userIds.add(user.getId());
             user.setRoomId(this.roomId);
 
+            if (broadcastHelloAction) {
+                broadcastToRoomExcept(user.getHelloAction(), user);
+            }
+
             onUserJoin(user);
         } finally {
             userIdsLock.writeLock().unlock();
@@ -186,12 +194,7 @@ public abstract class AbstractRoom {
     }
 
     public int getUserCount() {
-        userIdsLock.readLock().lock();
-        try {
-            return userIds.size();
-        } finally {
-            userIdsLock.readLock().unlock();
-        }
+        return userIds.size();
     }
 
     public boolean isFull() {
@@ -224,7 +227,45 @@ public abstract class AbstractRoom {
 
     public String renewInviteCode() {
         RoomManager.removeInviteCode(getInviteCode());
+        inviteCode = null;
         return getInviteCode();
+    }
+
+    public String getUserNames() {
+        return getUserNames(-1);
+    }
+
+    public String getUserNames(int limit) {
+        userIdsLock.readLock().lock();
+        try {
+            if (limit == 0) {
+                return "";
+            }
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+            boolean hasMore = false;
+            for (Long userId : userIds) {
+                Optional<User> userOpt = User.getUserById(userId);
+                if (userOpt.isPresent()) {
+                    if (limit > 0 && count >= limit) {
+                        hasMore = true;
+                        break;
+                    }
+                    User user = userOpt.get();
+                    if (count > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(user.getPeerId());
+                    count++;
+                }
+            }
+            if (hasMore) {
+                sb.append("...");
+            }
+            return sb.toString();
+        } finally {
+            userIdsLock.readLock().unlock();
+        }
     }
 
     public String getInfo() {
@@ -232,7 +273,7 @@ public abstract class AbstractRoom {
                 "Description: " + description + "\n" +
                 "Capacity: " + capacity + "\n" +
                 "Owner: " + (isDisowned() ? "None" : User.getUserById(ownerId).map(User::getPeerId).orElse("Unknown")) + "\n" +
-                "Users: " + getUserCount() + "\n" +
+                "Users(" + getUserCount() + "): " + getUserNames(3) + "\n" +
                 "Invite Code: " + (isInviteCodeGenerated() ? getInviteCode() : "None");
     }
 }

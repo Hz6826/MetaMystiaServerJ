@@ -7,9 +7,9 @@ plugins {
 }
 
 group = "com.metamystia.server"
-version = "0.2.0"
+version = "0.2.1"
 
-var metaMystiaVersion = "~0.15.0"
+var metaMystiaVersion = "~0.16.0"
 
 repositories {
     maven { url = uri("https://maven.aliyun.com/repository/public/") }

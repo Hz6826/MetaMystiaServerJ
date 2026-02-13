@@ -23,17 +23,11 @@ public abstract class AbstractNetAction {
     private long timestampMs;
     private long senderId;
 
+    public static final long SERVER_SENDER_ID = 0L;
+
     protected AbstractNetAction() {
         this.timestampMs = Instant.now().toEpochMilli();
-        this.senderId = 0L;
-    }
-
-    protected boolean skipReceiveOnStory() {
-        return false;
-    }
-
-    protected boolean skipSendOnStory() {
-        return false;
+        this.senderId = SERVER_SENDER_ID;
     }
 
     /**
@@ -64,5 +58,9 @@ public abstract class AbstractNetAction {
 
     public LogLevel getLogLevel() {
         return LogLevel.INFO;
+    }
+
+    public boolean isServerAction() {
+        return senderId == SERVER_SENDER_ID;
     }
 }

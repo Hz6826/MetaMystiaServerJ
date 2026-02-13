@@ -117,7 +117,13 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
     public static void closeWithReason(String channelId, String reason) {
         withChannel(channelId, channel -> {
-            sendAction(channelId, new MessageAction("Connection closed with reason: \n" + reason));
+            sendAction(channelId, MessageAction.ofServerMessage("Connection closed with reason: \n" + reason));
+            User.getUserByChannelId(channelId).ifPresent(
+                    user -> {
+                        User.removeUser(user);
+                        user.getRoom().ifPresent(room -> room.removeUser(user));
+                    }
+            );
             channel.close();
         });
     }

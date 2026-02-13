@@ -65,27 +65,47 @@ public class HelloAction extends AbstractNetAction{
             MainPacketHandler.closeWithReason(channelId, "Invalid version! Supported version(s): " + ManifestManager.getManifest().metaMystiaVersion());
             return true;
         }
-        HelloAction copy = new HelloAction(
-                Main.SERVER_NAME,
-                this.getVersion(),
-                this.getGameVersion(),
-                this.getCurrentGameScene(),
 
-                this.getPeerActiveDLCLabel(),
-                this.getPeerDLCRecipes(),
-                this.getPeerDLCCookers(),
-                this.getPeerDLCFoods(),
-                this.getPeerDLCBeverages(),
-                this.getPeerDLCNormalGuests(),
-                this.getPeerDLCSpecialGuests()
-        );  // TODO
-
-        user.sendAction(copy);
+        user.sendAction(getServerDefaultWithHelloAction(this));
         if (user.getRoom().isEmpty()) {
             RoomManager.getLobbyRoom().addUser(user);
         }
 
         log.info("User registered: {}, channel: {}", this.getSenderId(), channelId);
         return false;
+    }
+
+    public static HelloAction getServerDefaultWithUser(User user) {
+        return new HelloAction(
+                Main.SERVER_NAME,
+                user.getVersion(),
+                user.getGameVersion(),
+                user.getCurrentGameScene(),
+
+                user.getDlcInfo().getActiveDLCLabel(),
+                user.getDlcInfo().getDLCRecipes(),
+                user.getDlcInfo().getDLCCookers(),
+                user.getDlcInfo().getDLCFoods(),
+                user.getDlcInfo().getDLCBeverages(),
+                user.getDlcInfo().getDLCNormalGuests(),
+                user.getDlcInfo().getDLCSpecialGuests()
+        );
+    }
+
+    public static HelloAction getServerDefaultWithHelloAction(HelloAction helloAction) {
+        return new HelloAction(
+                Main.SERVER_NAME,
+                helloAction.getVersion(),
+                helloAction.getGameVersion(),
+                helloAction.getCurrentGameScene(),
+
+                helloAction.getPeerActiveDLCLabel(),
+                helloAction.getPeerDLCRecipes(),
+                helloAction.getPeerDLCCookers(),
+                helloAction.getPeerDLCFoods(),
+                helloAction.getPeerDLCBeverages(),
+                helloAction.getPeerDLCNormalGuests(),
+                helloAction.getPeerDLCSpecialGuests()
+        );
     }
 }
