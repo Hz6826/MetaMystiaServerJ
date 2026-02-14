@@ -135,7 +135,7 @@ public class RoomCommands {
             return 0;
         }
         AbstractRoom room = context.getSource().user().getRoom().orElseThrow();
-        if (!room.isDisowned() && !room.isOwnedBy(context.getSource().user())) {
+        if (!room.isOwnedBy(context.getSource().user())) {
             context.getSource().user().sendMessage("You are not the owner of this room.");
             return 0;
         }
