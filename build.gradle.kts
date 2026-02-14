@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.metamystia.server"
-version = "0.2.2"
+version = "0.2.3"
 
 var metaMystiaVersion = "~0.16.0"
 
