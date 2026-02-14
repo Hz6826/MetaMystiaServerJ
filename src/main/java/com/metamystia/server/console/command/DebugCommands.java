@@ -1,5 +1,6 @@
 package com.metamystia.server.console.command;
 
+import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.console.command.arguments.PermissionLevelArgumentType;
 import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.network.GameServer;
@@ -24,7 +25,7 @@ public class DebugCommands {
         );
 
         dispatcher.register(
-                literal("debug").requires(commandSource -> DebugUtils.debug || commandSource.user().hasPermission(PermissionLevel.ADMIN))
+                literal("debug").requires(commandSource -> ConfigManager.getConfig().isDebug() || commandSource.user().hasPermission(PermissionLevel.ADMIN))
                         .then(literal("stop").executes(DebugCommands::stopCommand))
                         .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
                         .then(literal("sendPrepReady").executes(DebugCommands::sendPrepReadyCommand))

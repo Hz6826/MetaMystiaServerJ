@@ -1,16 +1,15 @@
 package com.metamystia.server.util;
 
+import com.metamystia.server.config.ConfigManager;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DebugUtils {
-    public static boolean debug = false;
     public static boolean echo = false;
-    public static boolean logHex = false;
 
     public static void logBufHex(ByteBuf buf, String message) {
-        if (!logHex) return;
+        if (!ConfigManager.getConfig().isLogHex()) return;
         ByteBuf copy = buf.copy();
         StringBuilder sb = new StringBuilder();
         sb.append(message).append(": ");

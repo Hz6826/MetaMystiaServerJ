@@ -1,5 +1,6 @@
 package com.metamystia.server.network;
 
+import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.console.command.CommandManager;
 import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.network.handlers.DebugInboundHandler;
@@ -57,8 +58,8 @@ public class GameServer {
                             p.addLast(new LengthFieldPrepender(ByteOrder.LITTLE_ENDIAN, 4, 0, false));
 
                             // p.addLast(new AuthHandler());
-                            p.addLast(new MainPacketHandler());
                             p.addLast(new OutboundPacketHandler());
+                            p.addLast(new MainPacketHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
@@ -88,17 +89,10 @@ public class GameServer {
 
     private static GameServer INSTANCE;
 
-    public static synchronized GameServer getInstance(int port) {
+    public static synchronized GameServer getInstance() {
     	if (INSTANCE == null) {
-    		INSTANCE = new GameServer(port);
+    		INSTANCE = new GameServer(ConfigManager.getConfig().getPort());
     	}
     	return INSTANCE;
-    }
-
-    public static GameServer getInstance() {
-        if (INSTANCE == null) {
-            throw new IllegalStateException("GameServer not initialized");
-        }
-        return INSTANCE;
     }
 }

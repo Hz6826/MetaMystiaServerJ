@@ -2,6 +2,8 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
+import com.metamystia.server.config.AccessControlManager;
+import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.core.packet.PacketDispatcher;
 import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
@@ -15,8 +17,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -25,6 +29,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
+    private final AtomicInteger activeConnections = new AtomicInteger(0);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -65,7 +70,7 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error(cause.getMessage(), cause);
-        if(DebugUtils.debug) {
+        if(ConfigManager.getConfig().isDebug()) {
             closeWithReason(NetworkUtils.getChannelId(ctx), cause.getMessage());
         } else {
             closeWithReason(NetworkUtils.getChannelId(ctx), "Server internal error occurred!");
@@ -77,7 +82,27 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.info("New connection from {}", ctx.channel().remoteAddress());
+        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        String clientIp = remoteAddress.getAddress().getHostAddress();
+        log.info("New connection from {}", remoteAddress);
+
+        int current = activeConnections.incrementAndGet();
+        if (current > ConfigManager.getConfig().getMaxPlayers()) {
+            ctx.writeAndFlush(MessageAction.ofServerMessage("Server is full!"))
+                    .addListener(future -> ctx.close());
+            activeConnections.decrementAndGet();
+            return;
+        }
+
+        if (ConfigManager.getConfig().isWhitelist() && !AccessControlManager.isIpWhitelisted(clientIp)) {
+            ctx.writeAndFlush(MessageAction.ofServerMessage("You are not whitelisted!"))
+                    .addListener(future -> ctx.close());
+        }
+        if (ConfigManager.getConfig().isBlacklist() && AccessControlManager.isIpBlacklisted(clientIp)) {
+            ctx.writeAndFlush(MessageAction.ofServerMessage("You are blacklisted!"))
+                    .addListener(future -> ctx.close());
+        }
+
         channels.put(NetworkUtils.getChannelId(ctx), ctx.channel());
         super.channelActive(ctx);
     }
@@ -92,6 +117,7 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
                 },
                 () -> log.warn("User not found for channel {}", NetworkUtils.getChannelId(ctx))
         );
+        activeConnections.decrementAndGet();
         channels.remove(NetworkUtils.getChannelId(ctx));
         super.channelInactive(ctx);
     }
@@ -108,6 +134,8 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
         Channel channel = getChannel(channelId);
         if (channel != null) {
             action.accept(channel);
+        } else {
+            log.warn("Channel {} not found", channelId);
         }
     }
 

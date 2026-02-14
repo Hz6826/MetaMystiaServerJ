@@ -1,7 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.Main;
+import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.core.user.User;
@@ -66,8 +66,8 @@ public class HelloAction extends AbstractNetAction{
             return true;
         }
 
-        user.sendAction(getServerDefaultWithHelloAction(this));
         if (user.getRoom().isEmpty()) {
+            user.sendMessage("Welcome to " + ConfigManager.getConfig().getServerName() + "! Version: " + ManifestManager.getManifest().version());
             RoomManager.getLobbyRoom().addUser(user);
         }
 
@@ -77,7 +77,7 @@ public class HelloAction extends AbstractNetAction{
 
     public static HelloAction getServerDefaultWithUser(User user) {
         return new HelloAction(
-                Main.SERVER_NAME,
+                ConfigManager.getConfig().getServerName(),
                 user.getVersion(),
                 user.getGameVersion(),
                 user.getCurrentGameScene(),
@@ -94,7 +94,7 @@ public class HelloAction extends AbstractNetAction{
 
     public static HelloAction getServerDefaultWithHelloAction(HelloAction helloAction) {
         return new HelloAction(
-                Main.SERVER_NAME,
+                ConfigManager.getConfig().getServerName(),
                 helloAction.getVersion(),
                 helloAction.getGameVersion(),
                 helloAction.getCurrentGameScene(),
