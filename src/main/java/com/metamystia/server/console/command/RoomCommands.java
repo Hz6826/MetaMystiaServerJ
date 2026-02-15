@@ -66,10 +66,9 @@ public class RoomCommands {
         if (oldRoom != RoomManager.getLobbyRoom()) {
             context.getSource().user().sendMessage("You are already in room " + oldRoom.getName() + ". Leaving...");
         }
-        oldRoom.removeUser(context.getSource().user());
         RoomManager.addRoom(pairRoom);
-        pairRoom.addUser(context.getSource().user());
-        context.getSource().user().sendMessage("Created pair room.");
+        oldRoom.removeUser(context.getSource().user(), pairRoom.getRoomId());
+        context.getSource().user().sendMessage("Created pair room. Invite code: " + pairRoom.getInviteCode());
         return 1;
     }
 
@@ -107,8 +106,7 @@ public class RoomCommands {
                 context.getSource().user().sendMessage("You cannot join this room.");
                 return;
             }
-            context.getSource().user().getRoom().ifPresent(roomOld -> roomOld.removeUser(context.getSource().user()));
-            room.addUser(context.getSource().user());
+            context.getSource().user().getRoom().ifPresent(roomOld -> roomOld.removeUser(context.getSource().user(), room.getRoomId()));
             context.getSource().user().sendMessage("Joined room " + room.getName());
         }, () -> context.getSource().user().sendMessage("Invalid invite code."));
         return 1;
@@ -123,7 +121,7 @@ public class RoomCommands {
             return 0;
         }
         AbstractRoom room = context.getSource().user().getRoom().orElseThrow();
-        room.removeUser(context.getSource().user());
+        room.removeUserToDefaultLobby(context.getSource().user());
         context.getSource().user().sendMessage("Left room " + room.getName());
         if (!context.getSource().user().isInRoom()) {
             RoomManager.getLobbyRoom().addUser(context.getSource().user());

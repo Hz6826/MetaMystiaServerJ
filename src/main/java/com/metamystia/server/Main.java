@@ -39,7 +39,7 @@ public class Main {
         }
 
         if (ConfigManager.getConfig().isDebug()) {
-            log.warn("Debug mode enabled! This is not recommended in production environment!");
+            log.warn("Debug mode is enabled! This is not recommended in production environment!");
         }
 
         if (ConfigManager.getConfig().isDisableAuth()) {

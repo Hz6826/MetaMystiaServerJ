@@ -5,6 +5,7 @@ import com.hz6826.memorypack.serializer.SerializerRegistry;
 import com.metamystia.server.config.AccessControlManager;
 import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.core.packet.PacketDispatcher;
+import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
@@ -70,14 +71,15 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error(cause.getMessage(), cause);
-        if(ConfigManager.getConfig().isDebug()) {
-            closeWithReason(NetworkUtils.getChannelId(ctx), cause.getMessage());
-        } else {
-            closeWithReason(NetworkUtils.getChannelId(ctx), "Server internal error occurred!");
+        String reason = ConfigManager.getConfig().isDebug() ? cause.getMessage() : "Server internal error occurred!";
+        try {
+            if (ctx.channel().isActive()) {
+                sendAction(NetworkUtils.getChannelId(ctx), MessageAction.ofServerMessage(reason));
+            }
+        } catch (Exception e) {
+            log.error("Error closing channel: ", e);
         }
-        if(ctx.channel().isActive()) {
-            ctx.close();  // just in case
-        }
+        ctx.close();
     }
 
     @Override
@@ -108,17 +110,32 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        String channelId = NetworkUtils.getChannelId(ctx);
         log.info("Connection closed from {}", ctx.channel().remoteAddress());
-        User.getUserByChannelId(NetworkUtils.getChannelId(ctx)).ifPresentOrElse(
-                user -> {
-                    user.getRoom().ifPresent(room -> room.removeUser(user));
-                    User.removeUser(user);
-                },
-                () -> log.warn("User not found for channel {}", NetworkUtils.getChannelId(ctx))
-        );
-        activeConnections.decrementAndGet();
-        channels.remove(NetworkUtils.getChannelId(ctx));
-        super.channelInactive(ctx);
+        try {
+            User.getUserByChannelId(channelId).ifPresentOrElse(
+                    user -> {
+                        try {
+                            user.getRoom().ifPresent(room -> {
+                                try {
+                                    room.removeUser(user, RoomManager.NO_ROOM);
+                                } catch (Exception e) {
+                                    log.error("Error removing user from room: ", e);
+                                }
+                            });
+                        } finally {
+                            User.removeUser(user);
+                        }
+                    },
+                    () -> log.warn("User not found for channel {}", channelId)
+            );
+        } catch (Exception e) {
+            log.error("Error during channel inactive cleanup: ", e);
+        } finally {
+            activeConnections.decrementAndGet();
+            channels.remove(channelId);
+            super.channelInactive(ctx);
+        }
     }
 
     private static Channel getChannel(String channelId) {
@@ -148,13 +165,8 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
     public static void closeWithReason(String channelId, String reason) {
         withChannel(channelId, channel -> {
-            sendAction(channelId, MessageAction.ofServerMessage("Connection closed with reason: \n" + reason));
-            User.getUserByChannelId(channelId).ifPresent(
-                    user -> {
-                        User.removeUser(user);
-                        user.getRoom().ifPresent(room -> room.removeUser(user));
-                    }
-            );
+            channel.writeAndFlush(MessageAction.ofServerMessage("Connection closed: " + reason))
+                    .addListener(future -> channel.close());
             channel.close();
         });
     }

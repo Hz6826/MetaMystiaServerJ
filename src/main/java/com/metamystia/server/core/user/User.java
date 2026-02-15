@@ -48,6 +48,8 @@ public class User {
     @ToString.Exclude
     private ScheduledFuture<?> loginTimeoutTask;
 
+    private ReadyState readyState;
+
 
     public static User createUser(HelloAction helloAction, String channelId) {
         User user = User.of(helloAction, channelId);
@@ -104,7 +106,8 @@ public class User {
 
                 channelId,
                 DEFAULT_PERMISSION_LEVEL,
-                null
+                null,
+                new ReadyState()
         );
     }
 

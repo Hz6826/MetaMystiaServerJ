@@ -2,10 +2,7 @@ package com.metamystia.server.core.room;
 
 import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.core.user.User;
-import com.metamystia.server.network.actions.AbstractNetAction;
-import com.metamystia.server.network.actions.ActionType;
-import com.metamystia.server.network.actions.HelloAction;
-import com.metamystia.server.network.actions.MessageAction;
+import com.metamystia.server.network.actions.*;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +23,7 @@ public class LobbyRoom extends AbstractRoom {
         broadcastToRoomExcept("User joined lobby: " + user.getPeerId(), user);
 
         user.sendAction(HelloAction.getServerDefaultWithUser(user));
+        user.sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.REVOKE));
 
         log.info("User joined lobby: {}", user.getPeerId());
     }
@@ -37,7 +35,7 @@ public class LobbyRoom extends AbstractRoom {
     }
 
     @Override
-    public void onOwnerChange(User user) {
+    public void onOwnerChange(User oldOwner, User newOwner) {
         throw new UnsupportedOperationException("Cannot change owner of lobby");
     }
 

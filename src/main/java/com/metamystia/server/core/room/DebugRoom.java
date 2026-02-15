@@ -21,7 +21,7 @@ public class DebugRoom extends AbstractRoom {
     }
 
     @Override
-    public void onOwnerChange(User user) {
+    public void onOwnerChange(User oldOwner, User newOwner) {
 
     }
 

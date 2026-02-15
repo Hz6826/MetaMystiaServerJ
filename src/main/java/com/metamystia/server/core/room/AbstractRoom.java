@@ -50,7 +50,7 @@ public abstract class AbstractRoom {
 
     public abstract void onUserJoin(User user);
     public abstract void onUserLeave(User user);
-    public abstract void onOwnerChange(User user);
+    public abstract void onOwnerChange(User oldOwner, User newOwner);
     public abstract void onPacketReceived(User user, AbstractNetAction action);
     /**
      * Called when the room is destroyed.
@@ -117,11 +117,12 @@ public abstract class AbstractRoom {
         onPacketReceived(user, action);
     }
 
-    public final void changeOwner(User user) {
+    public final void changeOwner(User newOwner) {
         userIdsLock.writeLock().lock();
         try {
-            this.ownerId = user.getId();
-            onOwnerChange(user);
+            User oldOwner = User.getUserById(ownerId).orElse(null);
+            this.ownerId = newOwner.getId();
+            onOwnerChange(oldOwner, newOwner);
         } finally {
             userIdsLock.writeLock().unlock();
         }
@@ -165,8 +166,12 @@ public abstract class AbstractRoom {
                 userIds.stream().findFirst().flatMap(User::getUserById).ifPresentOrElse(this::changeOwner, () -> this.ownerId = NO_OWNER);
             }
 
-            user.setRoomId(RoomManager.NO_ROOM);
             onUserLeave(user);
+            if (toRoom == RoomManager.NO_ROOM) {
+                user.setRoomId(RoomManager.NO_ROOM);
+            } else {
+                RoomManager.getRoom(toRoom).orElseThrow().addUser(user);
+            }
 
             if (autoDisposeWhenEmpty && userIds.isEmpty()) {
                 RoomManager.removeRoom(this, false, toRoom);
@@ -176,8 +181,13 @@ public abstract class AbstractRoom {
         }
     }
 
-    public final void removeUser(User user) {
+    public final void removeUserToDefaultLobby(User user) {
         removeUser(user, RoomManager.DEFAULT_LOBBY_ID);
+    }
+
+    @Deprecated
+    public final void removeUser(User user) {
+        removeUser(user, RoomManager.NO_ROOM);
     }
 
     public final boolean isUserInRoom(User user) {

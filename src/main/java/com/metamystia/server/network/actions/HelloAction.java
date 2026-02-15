@@ -74,14 +74,18 @@ public class HelloAction extends AbstractNetAction{
             user.sendMessage("Welcome to " + ConfigManager.getConfig().getServerName() + "! Version: " + ManifestManager.getManifest().version());
             RoomManager.getLobbyRoom().addUser(user);
 
-            if (!ConfigManager.getConfig().isDisableAuth()) {
+            if (ConfigManager.getConfig().isDisableAuth()) {
+                if (AccessControlManager.isIpOp(user.getIp()) || AccessControlManager.isIdOp(user.getId())) {
+                    user.setPermissionLevel(PermissionLevel.ADMIN);
+                    user.sendMessage("Welcome back, Admin!");
+                } else {
+                    user.setPermissionLevel(PermissionLevel.USER);
+                }
+            } else {
                 user.setPermissionLevel(PermissionLevel.GUEST);
                 user.sendMessage("You are not logged in! Use: !auth login <password> to log in.");
                 int timeoutSeconds = ConfigManager.getConfig().getLoginTimeoutSeconds();
                 user.scheduleLoginTimeout(timeoutSeconds, TimeUnit.SECONDS);
-            } else if (AccessControlManager.isIpOp(user.getIp()) || AccessControlManager.isIdOp(user.getId())) {
-                user.setPermissionLevel(PermissionLevel.ADMIN);
-                user.sendMessage("Welcome back, Admin!");
             }
         }
 

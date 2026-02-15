@@ -4,6 +4,7 @@ import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.console.command.arguments.PermissionLevelArgumentType;
 import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.network.GameServer;
+import com.metamystia.server.network.actions.ChangeHostRoleAction;
 import com.metamystia.server.network.actions.ReadyAction;
 import com.metamystia.server.network.actions.SelectAction;
 import com.metamystia.server.util.DebugUtils;
@@ -38,6 +39,11 @@ public class DebugCommands {
                                 .executes(DebugCommands::getPermissionLevelCommand))
                         .then(literal("writeConfig")
                                 .executes(DebugCommands::writeConfigCommand))
+                        .then(literal("hostRole")
+                                .then(literal("grant")
+                                        .executes(DebugCommands::grantHostRoleCommand))
+                                .then(literal("revoke")
+                                        .executes(DebugCommands::revokeHostRoleCommand)))
         );
     }
 
@@ -91,6 +97,18 @@ public class DebugCommands {
     private static int writeConfigCommand(CommandContext<CommandSource> context) {
         ConfigManager.saveConfigToFile();
         context.getSource().user().sendMessage("Config has been written to disk.");
+        return 1;
+    }
+
+    private static int grantHostRoleCommand(CommandContext<CommandSource> context) {
+        context.getSource().user().sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.GRANT));
+        context.getSource().user().sendMessage("Host role is granted.");
+        return 1;
+    }
+
+    private static int revokeHostRoleCommand(CommandContext<CommandSource> context) {
+        context.getSource().user().sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.REVOKE));
+        context.getSource().user().sendMessage("Host role is revoked.");
         return 1;
     }
 }

@@ -1,6 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.core.user.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -28,5 +29,12 @@ public class ReadyAction extends AbstractNetAction{
     public enum ReadyType {
         DayOver,
         PrepOver
+    }
+
+    @Override
+    public boolean onReceivedDerived(String channelId) {
+        User user = User.getUserByChannelId(channelId).orElseThrow();
+        user.getReadyState().setReadyFor(readyType, true);
+        return false;
     }
 }

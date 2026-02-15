@@ -36,7 +36,9 @@ public enum ActionType {
     GUEST_LEAVE(GuestLeaveAction.class),
     BUFF(BuffAction.class),
     IZAKAYA_CLOSE(IzakayaCloseAction.class),
-    GET_COLLECTABLE(GetCollectableAction.class);
+    GET_COLLECTABLE(GetCollectableAction.class),
+
+    CHANGE_HOST_ROLE(ChangeHostRoleAction.class);
 
     ActionType(Class<?> relatedActionClass) {
         this.relatedActionClass = relatedActionClass;

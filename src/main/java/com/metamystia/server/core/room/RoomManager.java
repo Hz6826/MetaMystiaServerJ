@@ -41,7 +41,7 @@ public class RoomManager {
         if (room.getRoomId() == NO_ROOM) {
             throw new IllegalArgumentException("Cannot remove room with ID " + NO_ROOM);
         }
-        if (room.getRoomId() == lobbyRoom.getRoomId()) {
+        if (room.getRoomId() == lobbyRoom.getRoomId() && !force) {
             throw new IllegalArgumentException("Cannot remove lobby room");
         }
         if (room.onRoomDestroy() && !force) {
