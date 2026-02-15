@@ -90,7 +90,6 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
         if (current > ConfigManager.getConfig().getMaxPlayers()) {
             ctx.writeAndFlush(MessageAction.ofServerMessage("Server is full!"))
                     .addListener(future -> ctx.close());
-            activeConnections.decrementAndGet();
             return;
         }
 

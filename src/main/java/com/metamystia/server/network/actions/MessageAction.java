@@ -1,7 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.Main;
+import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.console.command.CommandManager;
 import com.metamystia.server.console.command.CommandSource;
 import com.metamystia.server.core.user.User;
@@ -34,7 +34,7 @@ public class MessageAction extends AbstractNetAction {
 
     public static MessageAction ofServerMessage(String message) {
         MessageAction messageAction = new MessageAction(message);
-        messageAction.addDecorator("[" + Main.SERVER_NAME + "] ");
+        messageAction.addDecorator("[" + ConfigManager.getConfig().getServerName() + "] ");
         return messageAction;
     }
 

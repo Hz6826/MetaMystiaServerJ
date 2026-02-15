@@ -15,8 +15,6 @@ import java.util.List;
 
 @Slf4j
 public class Main {
-    public static final String SERVER_NAME = "MetaMystiaServerJ";
-
     public static void main(String[] args) {
         ManifestManager.loadManifest();
         log.info("Starting {}...", ManifestManager.getManifest().name());
