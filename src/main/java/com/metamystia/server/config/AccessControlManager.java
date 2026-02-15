@@ -13,17 +13,22 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AccessControlManager {
     private record Lists(Set<Long> whitelistIds, Set<String> whitelistIps, Set<Long> blacklistIds,
-                         Set<String> blacklistIps) {
+                         Set<String> blacklistIps, Set<Long> opListIds, Set<String> opListIps) {
             public Lists(Set<Long> whitelistIds, Set<String> whitelistIps,
-                          Set<Long> blacklistIds, Set<String> blacklistIps) {
+                          Set<Long> blacklistIds, Set<String> blacklistIps,
+                          Set<Long> opListIds, Set<String> opListIps) {
                 this.whitelistIds = Set.copyOf(whitelistIds);
                 this.whitelistIps = Set.copyOf(whitelistIps);
                 this.blacklistIds = Set.copyOf(blacklistIds);
                 this.blacklistIps = Set.copyOf(blacklistIps);
+                this.opListIds = Set.copyOf(opListIds);
+                this.opListIps = Set.copyOf(opListIps);
             }
         }
 
     private static volatile Lists lists = new Lists(
+            Collections.emptySet(),
+            Collections.emptySet(),
             Collections.emptySet(),
             Collections.emptySet(),
             Collections.emptySet(),
@@ -37,11 +42,13 @@ public class AccessControlManager {
         Set<String> newWhitelistIps = loadStringSet(config.getWhitelistIpFile());
         Set<Long> newBlacklistIds = loadLongSet(config.getBlacklistFile());
         Set<String> newBlacklistIps = loadStringSet(config.getBlacklistIpFile());
+        Set<Long> newOpListIds = loadLongSet(config.getOpListFile());
+        Set<String> newOpListIps = loadStringSet(config.getOpListIpFile());
 
-        lists = new Lists(newWhitelistIds, newWhitelistIps, newBlacklistIds, newBlacklistIps);
+        lists = new Lists(newWhitelistIds, newWhitelistIps, newBlacklistIds, newBlacklistIps, newOpListIds, newOpListIps);
 
-        log.info("Loaded whitelist IDs: {}, whitelist IPs: {}, blacklist IDs: {}, blacklist IPs: {}",
-                newWhitelistIds.size(), newWhitelistIps.size(), newBlacklistIds.size(), newBlacklistIps.size());
+        log.info("Loaded whitelist IDs: {}, whitelist IPs: {}, blacklist IDs: {}, blacklist IPs: {}, op IDs: {}, op IPs: {}",
+                newWhitelistIds.size(), newWhitelistIps.size(), newBlacklistIds.size(), newBlacklistIps.size(), newOpListIds.size(), newOpListIps.size());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -99,6 +106,14 @@ public class AccessControlManager {
         return lists.blacklistIps.contains(ip);
     }
 
+    public static boolean isIdOp(long id) {
+        return lists.opListIds.contains(id);
+    }
+
+    public static boolean isIpOp(String ip) {
+        return lists.opListIps.contains(ip);
+    }
+
     public static Set<Long> getWhitelistIds() {
         return lists.whitelistIds;
     }
@@ -113,5 +128,13 @@ public class AccessControlManager {
 
     public static Set<String> getBlacklistIps() {
         return lists.blacklistIps;
+    }
+
+    public static Set<Long> getOpListIds() {
+        return lists.opListIds;
+    }
+
+    public static Set<String> getOpListIps() {
+        return lists.opListIps;
     }
 }

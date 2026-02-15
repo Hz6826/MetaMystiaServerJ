@@ -1,9 +1,11 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
+import com.metamystia.server.config.AccessControlManager;
 import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.core.room.RoomManager;
+import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.handlers.MainPacketHandler;
 import com.metamystia.server.util.ManifestManager;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -67,8 +70,19 @@ public class HelloAction extends AbstractNetAction{
         }
 
         if (user.getRoom().isEmpty()) {
+            user.sendAction(getServerDefaultWithHelloAction(this));
             user.sendMessage("Welcome to " + ConfigManager.getConfig().getServerName() + "! Version: " + ManifestManager.getManifest().version());
             RoomManager.getLobbyRoom().addUser(user);
+
+            if (!ConfigManager.getConfig().isDisableAuth()) {
+                user.setPermissionLevel(PermissionLevel.GUEST);
+                user.sendMessage("You are not logged in! Use: !auth login <password> to log in.");
+                int timeoutSeconds = ConfigManager.getConfig().getLoginTimeoutSeconds();
+                user.scheduleLoginTimeout(timeoutSeconds, TimeUnit.SECONDS);
+            } else if (AccessControlManager.isIpOp(user.getIp()) || AccessControlManager.isIdOp(user.getId())) {
+                user.setPermissionLevel(PermissionLevel.ADMIN);
+                user.sendMessage("Welcome back, Admin!");
+            }
         }
 
         log.info("User registered: {}, channel: {}", this.getSenderId(), channelId);

@@ -1,5 +1,6 @@
 package com.metamystia.server.core.room;
 
+import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
@@ -42,7 +43,7 @@ public class LobbyRoom extends AbstractRoom {
 
     @Override
     public void onPacketReceived(User user, AbstractNetAction action) {
-        if (action.getType() == ActionType.MESSAGE) {
+        if (action.getType() == ActionType.MESSAGE && user.hasPermissionAtLeast(PermissionLevel.USER)) {
             MessageAction messageAction = (MessageAction) action;
             messageAction.addDecorator("<" + User.getUserOrChannelIdString(user.getChannelId()) + "> ");
             broadcastToRoomExcept(messageAction, user);

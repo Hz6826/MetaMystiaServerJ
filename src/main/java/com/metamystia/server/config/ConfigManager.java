@@ -15,6 +15,8 @@ import java.util.List;
 public class ConfigManager {
     public static final String DEFAULT_CONFIG_PATH = "config.json";
 
+    private static String lastConfigPath = DEFAULT_CONFIG_PATH;
+
     private static final ObjectMapper mapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -26,6 +28,7 @@ public class ConfigManager {
 
         private int port = 40815;
         private int maxPlayers = 20;
+        private int loginTimeoutSeconds = 60;
 
         private boolean whitelist = false;
         private String whitelistFile = "whitelist.txt";
@@ -35,21 +38,26 @@ public class ConfigManager {
         private String blacklistFile = "blacklist.txt";
         private String blacklistIpFile = "blacklist_ip.txt";
 
+        private String opListFile = "ops.txt";
+        private String opListIpFile = "ops_ip.txt";
+
         private boolean noTip = false;
         private boolean showManifest = false;
         private boolean debug = false;
         private boolean logHex = false;
+        private boolean disableAuth = false;
     }
 
     @Getter
     private static Config config = new Config();
 
     public static void loadConfigFromFile() {
-        loadConfigFromFile(DEFAULT_CONFIG_PATH);
+        loadConfigFromFile(lastConfigPath);
     }
 
     public static void loadConfigFromFile(String path) {
         log.info("Loading config from {}", path);
+        lastConfigPath = path;
         File file = new File(path);
         if (file.exists()) {
             try {
@@ -65,11 +73,12 @@ public class ConfigManager {
     }
 
     public static void saveConfigToFile() {
-        saveConfigToFile(DEFAULT_CONFIG_PATH);
+        saveConfigToFile(lastConfigPath);
     }
 
     public static void saveConfigToFile(String path) {
         log.info("Saving config to {}", path);
+        lastConfigPath = path;
         try {
             mapper.writeValue(new File(path), config);
             log.info("Config saved successfully.");

@@ -1,5 +1,6 @@
 package com.metamystia.server.core.user;
 
+import com.metamystia.server.console.command.CommandManager;
 import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.core.room.AbstractRoom;
 import com.metamystia.server.core.room.RoomManager;
@@ -7,16 +8,20 @@ import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.HelloAction;
 import com.metamystia.server.network.actions.MessageAction;
 import com.metamystia.server.network.handlers.MainPacketHandler;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.ToString;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Data
 @AllArgsConstructor
 public class User {
-    private static final PermissionLevel DEFAULT_PERMISSION_LEVEL = PermissionLevel.USER;  // TODO: move to config
+    private static final PermissionLevel DEFAULT_PERMISSION_LEVEL = PermissionLevel.GUEST;
 
     private static final Map<Long, User> userIdMap= new ConcurrentHashMap<>();
 
@@ -26,15 +31,22 @@ public class User {
     private String gameVersion;
     private Scene currentGameScene;
 
+    private String ip;
+
     private long latency;
 
+    @ToString.Exclude
     private DLCInfo dlcInfo;
+    @ToString.Exclude
     private UserPos userPos;
 
     private int roomId;
 
     private String channelId;
     private PermissionLevel permissionLevel;
+
+    @ToString.Exclude
+    private ScheduledFuture<?> loginTimeoutTask;
 
 
     public static User createUser(HelloAction helloAction, String channelId) {
@@ -74,6 +86,8 @@ public class User {
                 helloAction.getGameVersion(),
                 helloAction.getCurrentGameScene(),
 
+                MainPacketHandler.getIp(channelId),
+
                 -1,
 
                 new DLCInfo(helloAction.getPeerActiveDLCLabel(),
@@ -89,7 +103,8 @@ public class User {
                 RoomManager.NO_ROOM,
 
                 channelId,
-                DEFAULT_PERMISSION_LEVEL
+                DEFAULT_PERMISSION_LEVEL,
+                null
         );
     }
 
@@ -105,7 +120,7 @@ public class User {
         MainPacketHandler.closeWithReason(this.getChannelId(), reason);
     }
 
-    public boolean hasPermission(PermissionLevel permissionLevel) {
+    public boolean hasPermissionAtLeast(PermissionLevel permissionLevel) {
         return this.permissionLevel.isAtLeast(permissionLevel);
     }
 
@@ -133,5 +148,21 @@ public class User {
         );
         helloAction.setSenderId(this.id);
         return helloAction;
+    }
+
+    public void scheduleLoginTimeout(long delay, TimeUnit unit) {
+        cancelLoginTimeout();
+        this.loginTimeoutTask = CommandManager.SCHEDULER.schedule(() -> {
+            if (User.getUserById(this.id).isPresent() && this.permissionLevel == PermissionLevel.GUEST) {
+                closeWithReason("Login timeout");
+            }
+        }, delay, unit);
+    }
+
+    public void cancelLoginTimeout() {
+        if (loginTimeoutTask != null && !loginTimeoutTask.isDone()) {
+            loginTimeoutTask.cancel(false);
+        }
+        loginTimeoutTask = null;
     }
 }

@@ -3,6 +3,7 @@ package com.metamystia.server.console.command;
 import com.metamystia.server.core.room.AbstractRoom;
 import com.metamystia.server.core.room.PairRoom;
 import com.metamystia.server.core.room.RoomManager;
+import com.metamystia.server.core.user.PermissionLevel;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,7 +14,7 @@ import static com.metamystia.server.console.command.CommandManager.literal;
 public class RoomCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
-                literal("room")
+                literal("room").requires(commandSource -> commandSource.user().hasPermissionAtLeast(PermissionLevel.USER))
                         .then(literal("list").executes(RoomCommands::listRoomsCommand))
                         .then(literal("info").executes(RoomCommands::roomInfoCommand)
                                 .then(literal("users").executes(RoomCommands::roomUserInfoCommand)))

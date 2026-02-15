@@ -20,12 +20,7 @@ import static com.metamystia.server.console.command.CommandManager.literal;
 public class DebugCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
-                literal("help").executes(DebugCommands::helpCommandNoArgs)
-                        .then(argument("command", StringArgumentType.greedyString()).executes(DebugCommands::helpCommand))
-        );
-
-        dispatcher.register(
-                literal("debug").requires(commandSource -> ConfigManager.getConfig().isDebug() || commandSource.user().hasPermission(PermissionLevel.ADMIN))
+                literal("debug").requires(commandSource -> ConfigManager.getConfig().isDebug() || commandSource.user().hasPermissionAtLeast(PermissionLevel.ADMIN))
                         .then(literal("stop").executes(DebugCommands::stopCommand))
                         .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
                         .then(literal("sendPrepReady").executes(DebugCommands::sendPrepReadyCommand))
@@ -41,27 +36,9 @@ public class DebugCommands {
                                         .executes(DebugCommands::setPermissionLevelCommand)))
                         .then(literal("getPermissionLevel")
                                 .executes(DebugCommands::getPermissionLevelCommand))
+                        .then(literal("writeConfig")
+                                .executes(DebugCommands::writeConfigCommand))
         );
-    }
-
-    private static int helpCommandNoArgs(CommandContext<CommandSource> context) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\nAvailable commands:");
-
-        String[] allUsage = CommandManager.dispatcher.getAllUsage(CommandManager.dispatcher.getRoot(), context.getSource(), true);
-        for (String usage : allUsage) {
-            sb.append("\n").append(CommandManager.COMMAND_PREFIX).append(usage);
-        }
-
-        context.getSource().user().sendMessage(sb.toString());
-        return 1;
-    }
-
-    private static int helpCommand(CommandContext<CommandSource> context) {
-        String command = StringArgumentType.getString(context, "command");
-
-        context.getSource().user().sendMessage("Not implemented yet!");  // TODO
-        return 1;
     }
 
     private static int stopCommand(CommandContext<CommandSource> context) {
@@ -108,6 +85,12 @@ public class DebugCommands {
     private static int getPermissionLevelCommand(CommandContext<CommandSource> context) {
         PermissionLevel permissionLevel = context.getSource().user().getPermissionLevel();
         context.getSource().user().sendMessage("Permission level: " + permissionLevel);
+        return 1;
+    }
+
+    private static int writeConfigCommand(CommandContext<CommandSource> context) {
+        ConfigManager.saveConfigToFile();
+        context.getSource().user().sendMessage("Config has been written to disk.");
         return 1;
     }
 }

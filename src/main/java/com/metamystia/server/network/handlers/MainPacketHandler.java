@@ -138,6 +138,10 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    public static String getIp(String channelId) {
+        return ((InetSocketAddress) getChannel(channelId).remoteAddress()).getAddress().getHostAddress();
+    }
+
     public static void sendAction(String channelId, AbstractNetAction action) {
         withChannel(channelId, channel -> channel.writeAndFlush(action));
     }

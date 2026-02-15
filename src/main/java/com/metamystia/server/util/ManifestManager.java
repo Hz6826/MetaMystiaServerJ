@@ -37,7 +37,6 @@ public class ManifestManager {
                     "========================";
         }
 
-        @NonNull
         public String versionInfo() {
             return "Version: " + version + " built at " + buildTime + " with commit " + gitCommit + " for MetaMystia " + metaMystiaVersion;
         }

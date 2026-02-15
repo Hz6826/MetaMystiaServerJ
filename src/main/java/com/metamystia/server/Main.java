@@ -20,11 +20,13 @@ public class Main {
         log.info("Starting {}...", ManifestManager.getManifest().name());
 
         List<String> argsList = Arrays.asList(args);
+
         if (argsList.contains("--config")) {
             ConfigManager.loadConfigFromFile(argsList.get(argsList.indexOf("--config") + 1));
         } else {
             ConfigManager.loadConfigFromFile();
         }
+        ConfigManager.mergeFromArgsList(argsList);
 
         if (ConfigManager.getConfig().isShowManifest()) {
             log.info(ManifestManager.getManifest().toString());
@@ -37,7 +39,11 @@ public class Main {
         }
 
         if (ConfigManager.getConfig().isDebug()) {
-            log.warn("Debug mode enabled! Don't enable it in production environment!");
+            log.warn("Debug mode enabled! This is not recommended in production environment!");
+        }
+
+        if (ConfigManager.getConfig().isDisableAuth()) {
+            log.warn("Auth is disabled! This is not recommended in production environment!");
         }
 
         AccessControlManager.loadLists();
