@@ -21,7 +21,20 @@ public class MessageAction extends AbstractNetAction {
 
     private static final int MAX_MESSAGE_LEN = 1024;
 
+    @ToString.Exclude
     private String message;
+
+    @ToString.Include(name = "message")
+    private String getMessageForToString() {
+        if (message == null) return null;
+        String escaped = message
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+        return "\"" + escaped + "\"";
+    }
 
     public MessageAction() {
         super();
