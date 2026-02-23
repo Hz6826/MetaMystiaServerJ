@@ -23,7 +23,7 @@ public class LobbyRoom extends AbstractRoom {
         broadcastToRoomExcept("User joined lobby: " + user.getPeerId(), user);
 
         user.sendAction(HelloAction.getServerDefaultWithUser(user));
-        user.sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.REVOKE));
+        user.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
 
         log.info("User joined lobby: {}", user.getPeerId());
     }

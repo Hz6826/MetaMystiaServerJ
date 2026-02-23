@@ -9,7 +9,7 @@ plugins {
 group = "com.metamystia.server"
 version = "0.2.4"
 
-var metaMystiaVersion = "~0.16.0"
+var metaMystiaVersion = "~0.17.0"
 
 repositories {
     maven { url = uri("https://maven.aliyun.com/repository/public/") }
@@ -45,9 +45,9 @@ dependencies {
     annotationProcessor("com.google.auto.service:auto-service-annotations:1.1.1")
     compileOnly("com.google.auto.service:auto-service:1.1.1")
 
-    // memory pack TODO: add memory pack repo to maven, and replace this local file reference
-    annotationProcessor(":memorypack:0.1.6")
-    implementation(":memorypack:0.1.6")
+    // memory pack TODO: replace with jitpack, and replace this local file reference
+    annotationProcessor(":memorypack:0.1.7")
+    implementation(":memorypack:0.1.7")
 
     annotationProcessor("org.slf4j:slf4j-api:1.7.30")
     annotationProcessor("org.slf4j:slf4j-simple:1.7.30")

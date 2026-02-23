@@ -36,9 +36,9 @@ public enum ActionType {
     GUEST_LEAVE(GuestLeaveAction.class),
     BUFF(BuffAction.class),
     IZAKAYA_CLOSE(IzakayaCloseAction.class),
-    GET_COLLECTABLE(GetCollectableAction.class),
-
-    CHANGE_HOST_ROLE(ChangeHostRoleAction.class);
+    GET_COLLECTABLE(GetCollectableAction.class),  // disabled
+    PLAYER_ID_CHANGE(PlayerIdChangeAction.class),
+    OVERRIDE_ROLE(OverrideRoleAction.class);
 
     ActionType(Class<?> relatedActionClass) {
         this.relatedActionClass = relatedActionClass;

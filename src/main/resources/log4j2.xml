@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
-        <Property name="LOG_PATTERN">
+        <Property name="CONSOLE_PATTERN">
             [%d{yyyy-MM-dd HH:mm:ss.SSS}] %highlight{%-5p}{FATAL=red, ERROR=red, WARN=yellow, INFO=green} %c{1}:%L - %m%n
+        </Property>
+        <Property name="FILE_PATTERN">
+            [%d{yyyy-MM-dd HH:mm:ss.SSS}] %-5p %c{1}:%L - %m%n
         </Property>
         <Property name="LOG_DIR">logs</Property>
     </Properties>
@@ -10,7 +13,7 @@
         <!-- console -->
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout pattern="${CONSOLE_PATTERN}"/>
         </Console>
 
         <!-- rolling file -->
@@ -18,7 +21,7 @@
                      fileName="${LOG_DIR}/mmsj.log"
                      filePattern="${LOG_DIR}/mmsj-%d{yyyy-MM-dd}-%i.log.gz">
             <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout pattern="${FILE_PATTERN}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
                 <SizeBasedTriggeringPolicy size="10 MB"/>
@@ -27,7 +30,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="com.example" level="debug" additivity="false">
+        <Logger name="com.metamystia.server" level="debug">
             <AppenderRef ref="RollingFile"/>
         </Logger>
         <Root level="info">

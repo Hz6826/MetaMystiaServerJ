@@ -4,7 +4,7 @@ import com.metamystia.server.config.ConfigManager;
 import com.metamystia.server.console.command.arguments.PermissionLevelArgumentType;
 import com.metamystia.server.core.user.PermissionLevel;
 import com.metamystia.server.network.GameServer;
-import com.metamystia.server.network.actions.ChangeHostRoleAction;
+import com.metamystia.server.network.actions.OverrideRoleAction;
 import com.metamystia.server.network.actions.ReadyAction;
 import com.metamystia.server.network.actions.SelectAction;
 import com.metamystia.server.util.DebugUtils;
@@ -101,14 +101,14 @@ public class DebugCommands {
     }
 
     private static int grantHostRoleCommand(CommandContext<CommandSource> context) {
-        context.getSource().user().sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.GRANT));
+        context.getSource().user().sendAction(new OverrideRoleAction(OverrideRoleAction.Role.HOST));
         context.getSource().user().sendMessage("Host role is granted.");
         return 1;
     }
 
     private static int revokeHostRoleCommand(CommandContext<CommandSource> context) {
-        context.getSource().user().sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.REVOKE));
-        context.getSource().user().sendMessage("Host role is revoked.");
+        context.getSource().user().sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
+        context.getSource().user().sendMessage("Client role is granted.");
         return 1;
     }
 }

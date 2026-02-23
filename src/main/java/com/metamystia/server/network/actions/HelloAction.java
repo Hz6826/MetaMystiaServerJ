@@ -40,11 +40,31 @@ public class HelloAction extends AbstractNetAction{
     private Set<Integer> peerDLCNormalGuests;
     private Set<Integer> peerDLCSpecialGuests;
 
+    // ResourceEx (rEx) resource sets
+    private Set<Integer> peerRExRecipes;
+    private Set<Integer> peerRExFoods;
+    private Set<Integer> peerRExBeverages;
+    private Set<Integer> peerRExSpecialGuests;
+
     public HelloAction() {
         super();
     }
 
-    public HelloAction(String peerId, String version, String gameVersion, Scene currentGameScene, List<String> peerActiveDLCLabel, Set<Integer> peerDLCRecipes, Set<Integer> peerDLCCookers, Set<Integer> peerDLCFoods, Set<Integer> peerDLCBeverages, Set<Integer> peerDLCNormalGuests, Set<Integer> peerDLCSpecialGuests) {
+    public HelloAction(String peerId,
+                       String version,
+                       String gameVersion,
+                       Scene currentGameScene,
+                       List<String> peerActiveDLCLabel,
+                       Set<Integer> peerDLCRecipes,
+                       Set<Integer> peerDLCCookers,
+                       Set<Integer> peerDLCFoods,
+                       Set<Integer> peerDLCBeverages,
+                       Set<Integer> peerDLCNormalGuests,
+                       Set<Integer> peerDLCSpecialGuests,
+                       Set<Integer> peerRExRecipes,
+                       Set<Integer> peerRExFoods,
+                       Set<Integer> peerRExBeverages,
+                       Set<Integer> peerRExSpecialGuests) {
         super();
 
         this.peerId = peerId;
@@ -59,6 +79,11 @@ public class HelloAction extends AbstractNetAction{
         this.peerDLCBeverages = peerDLCBeverages;
         this.peerDLCNormalGuests = peerDLCNormalGuests;
         this.peerDLCSpecialGuests = peerDLCSpecialGuests;
+
+        this.peerRExRecipes = peerRExRecipes;
+        this.peerRExFoods = peerRExFoods;
+        this.peerRExBeverages = peerRExBeverages;
+        this.peerRExSpecialGuests = peerRExSpecialGuests;
     }
 
     @Override
@@ -106,7 +131,12 @@ public class HelloAction extends AbstractNetAction{
                 user.getDlcInfo().getDLCFoods(),
                 user.getDlcInfo().getDLCBeverages(),
                 user.getDlcInfo().getDLCNormalGuests(),
-                user.getDlcInfo().getDLCSpecialGuests()
+                user.getDlcInfo().getDLCSpecialGuests(),
+
+                user.getRExInfo().getRExRecipes(),
+                user.getRExInfo().getRExFoods(),
+                user.getRExInfo().getRExBeverages(),
+                user.getRExInfo().getRExSpecialGuests()
         );
     }
 
@@ -123,7 +153,12 @@ public class HelloAction extends AbstractNetAction{
                 helloAction.getPeerDLCFoods(),
                 helloAction.getPeerDLCBeverages(),
                 helloAction.getPeerDLCNormalGuests(),
-                helloAction.getPeerDLCSpecialGuests()
+                helloAction.getPeerDLCSpecialGuests(),
+
+                helloAction.getPeerRExRecipes(),
+                helloAction.getPeerRExFoods(),
+                helloAction.getPeerRExBeverages(),
+                helloAction.getPeerRExSpecialGuests()
         );
     }
 }

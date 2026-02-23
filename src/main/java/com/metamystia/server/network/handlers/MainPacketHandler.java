@@ -19,6 +19,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,6 +71,10 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if (cause instanceof SocketException && cause.getMessage().contains("Connection reset")) {
+            log.warn("Connection reset by peer: {}", cause.getMessage());
+            return;
+        }
         log.error(cause.getMessage(), cause);
         String reason = ConfigManager.getConfig().isDebug() ? cause.getMessage() : "Server internal error occurred!";
         try {

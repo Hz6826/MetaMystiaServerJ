@@ -11,13 +11,17 @@ import com.metamystia.server.network.handlers.MainPacketHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Data
 @AllArgsConstructor
 public class User {
@@ -37,6 +41,8 @@ public class User {
 
     @ToString.Exclude
     private DLCInfo dlcInfo;
+    @ToString.Exclude
+    private RExInfo rExInfo;
     @ToString.Exclude
     private UserPos userPos;
 
@@ -100,6 +106,11 @@ public class User {
                         helloAction.getPeerDLCNormalGuests(),
                         helloAction.getPeerDLCSpecialGuests()),
 
+                new RExInfo(helloAction.getPeerRExRecipes(),
+                        helloAction.getPeerRExFoods(),
+                        helloAction.getPeerRExBeverages(),
+                        helloAction.getPeerRExSpecialGuests()),
+
                 new UserPos(),
 
                 RoomManager.NO_ROOM,
@@ -147,7 +158,11 @@ public class User {
                 this.dlcInfo.getDLCFoods(),
                 this.dlcInfo.getDLCBeverages(),
                 this.dlcInfo.getDLCNormalGuests(),
-                this.dlcInfo.getDLCSpecialGuests()
+                this.dlcInfo.getDLCSpecialGuests(),
+                this.rExInfo.getRExRecipes(),
+                this.rExInfo.getRExFoods(),
+                this.rExInfo.getRExBeverages(),
+                this.rExInfo.getRExSpecialGuests()
         );
         helloAction.setSenderId(this.id);
         return helloAction;
@@ -155,9 +170,11 @@ public class User {
 
     public void scheduleLoginTimeout(long delay, TimeUnit unit) {
         cancelLoginTimeout();
+        log.info("Scheduling login timeout for user {}", this.peerId);
         this.loginTimeoutTask = CommandManager.SCHEDULER.schedule(() -> {
             if (User.getUserById(this.id).isPresent() && this.permissionLevel == PermissionLevel.GUEST) {
                 closeWithReason("Login timeout");
+                log.info("User {} timed out", this.peerId);
             }
         }, delay, unit);
     }
@@ -167,5 +184,30 @@ public class User {
             loginTimeoutTask.cancel(false);
         }
         loginTimeoutTask = null;
+    }
+
+    @FunctionalInterface
+    public interface SceneChangeListener {
+        void onSceneChange(Scene oldScene, Scene newScene);
+    }
+
+    private final List<SceneChangeListener> sceneChangeListeners = new CopyOnWriteArrayList<>();
+
+    public void addOneTimeSceneChangeListener(SceneChangeListener listener) {
+        sceneChangeListeners.add(new SceneChangeListener() {
+            @Override
+            public void onSceneChange(Scene oldScene, Scene newScene) {
+                listener.onSceneChange(oldScene, newScene);
+                sceneChangeListeners.remove(this);
+            }
+        });
+    }
+
+    public void setCurrentGameScene(Scene currentGameScene) {
+        Scene oldScene = this.currentGameScene;
+        this.currentGameScene = currentGameScene;
+        for (SceneChangeListener listener : sceneChangeListeners) {
+            listener.onSceneChange(oldScene, currentGameScene);
+        }
     }
 }

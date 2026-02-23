@@ -1,5 +1,6 @@
 package com.metamystia.server.core.room;
 
+import com.metamystia.server.core.gamedata.Scene;
 import com.metamystia.server.core.user.User;
 import com.metamystia.server.network.actions.*;
 import lombok.ToString;
@@ -41,7 +42,19 @@ public class PairRoom extends AbstractRoom {
         try {
             if (getUserCount() == 1) {
                 User firstUser = User.getUserById(this.getUserIds().getFirst()).orElseThrow();
-                firstUser.sendAction(HelloAction.getServerDefaultWithUser(user));
+                if (firstUser.getCurrentGameScene() == Scene.DayScene || firstUser.getCurrentGameScene() == Scene.ResultScene) {
+                    firstUser.sendAction(HelloAction.getServerDefaultWithUser(user));
+                } else {
+                    firstUser.sendMessage("Your partner left the room, so this room will be closed after the night ends.");
+                    firstUser.addOneTimeSceneChangeListener(new User.SceneChangeListener() {
+                        @Override
+                        public void onSceneChange(Scene oldScene, Scene newScene) {
+                            if (newScene == Scene.DayScene) {
+                                removeUserToDefaultLobby(user);
+                            }
+                        }
+                    });
+                }
             }
         } finally {
             lock.unlock();
@@ -51,9 +64,9 @@ public class PairRoom extends AbstractRoom {
     @Override
     public void onOwnerChange(User oldOwner, User newOwner) {
         if(oldOwner != null){
-            oldOwner.sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.REVOKE));
+            oldOwner.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
         }
-        newOwner.sendAction(new ChangeHostRoleAction(ChangeHostRoleAction.ChangeType.GRANT));
+        newOwner.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.HOST));
     }
 
     @Override
@@ -65,6 +78,8 @@ public class PairRoom extends AbstractRoom {
                 broadcastToRoom(new ReadyAction(readyAction.getReadyType(), true));
                 return;
             }
+        } else if (action.getType() == ActionType.OVERRIDE_ROLE) {
+            return;  // ignore
         }
         broadcastToRoomExcept(action, user);
     }
