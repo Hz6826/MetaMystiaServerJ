@@ -21,6 +21,9 @@ import java.util.jar.JarFile;
 
 @Slf4j
 public class PluginManager {
+    private static final String MANIFEST_FILE = "mmsj.plugin.json";
+    private static final String CORE_ID = "mmsj";
+
     private static final Map<String, PluginInfo> loadedPlugins = new HashMap<>();
     private static final Map<String, IPlugin> pluginInstances = new HashMap<>();
     private static final Map<String, Class<?>> authProviderClasses = new HashMap<>();
@@ -58,9 +61,9 @@ public class PluginManager {
         List<PluginEntry> allEntries = new ArrayList<>();
         for (File jarFile : jarFiles) {
             try (JarFile jar = new JarFile(jarFile)) {
-                JarEntry jsonEntry = jar.getJarEntry("mmsj.plugin.json");
+                JarEntry jsonEntry = jar.getJarEntry(MANIFEST_FILE);
                 if (jsonEntry == null) {
-                    log.warn("Skipping {}: missing mmsj.plugin.json", jarFile.getName());
+                    log.warn("Skipping {}: missing {}", jarFile.getName(), MANIFEST_FILE);
                     continue;
                 }
 
@@ -250,7 +253,7 @@ public class PluginManager {
             return false;
         }
 
-        if (id.equalsIgnoreCase("mmsj")) {
+        if (id.equalsIgnoreCase(CORE_ID)) {
             if (ManifestManager.getManifest() == null) {
                 log.error("Core manifest not available");
                 return false;
