@@ -162,7 +162,7 @@ public class PluginManager {
                         loaded.put(id, info);
                         instances.put(id, instance);
                         log.info("Successfully loaded plugin {} version {} by {}",
-                                info.getName(), info.getVersion(), info.getAuthor());
+                                info.getName(), info.getVersion(), info.getAuthors());
                         changed = true;
                         it.remove();
                     } catch (Exception e) {

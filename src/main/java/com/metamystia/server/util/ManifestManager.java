@@ -10,13 +10,6 @@ import java.util.List;
 
 @Slf4j
 public class ManifestManager {
-    public record Author(String name, String url) {
-        @NonNull
-        public String toString() {
-            return name + " (" + url + ")";
-        }
-    }
-
     public record ManifestInfo(String name, String description, String license, String source, String issueTracker,
                                List<Author> authors, String version, String buildTime, String gitCommit,
                                String metaMystiaVersion) {

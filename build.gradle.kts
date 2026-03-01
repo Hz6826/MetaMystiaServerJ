@@ -4,6 +4,7 @@ import java.util.Date
 plugins {
     id("java")
     id("com.gradleup.shadow") version "9.3.1"
+    id("maven-publish")
 }
 
 val metaMystiaVersion: String by project
@@ -97,5 +98,33 @@ tasks.test {
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "com.metamystia.server.Main"
+    }
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.classes)
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.javadoc)
+    archiveClassifier.set("javadoc")
+    from(tasks.javadoc.get().destinationDir)
+}
+
+tasks.withType<Javadoc> {
+    options.encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifact(tasks.shadowJar.get())
+
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
+        }
     }
 }

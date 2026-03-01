@@ -1,15 +1,22 @@
 package com.metamystia.server.core.plugin;
 
+import com.metamystia.server.util.Author;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class PluginInfo {
     private String id;
-    private String name;
     private String version;
-    private String author;
+
+    private String name;
     private String description;
-    private String website;
+    private String license;
+    private String source;
+    private String issueTracker;
+
+    private List<Author> authors;
 
     private String entrypoint;
     private String authProvider;
