@@ -121,6 +121,10 @@ tasks.withType<Javadoc> {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
+            groupId = project.group.toString()
+            artifactId = "MetaMystiaServerJ"
+            version = project.version.toString()
+
             artifact(tasks.shadowJar.get())
 
             artifact(tasks["sourcesJar"])
