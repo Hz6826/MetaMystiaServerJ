@@ -2,11 +2,12 @@ package com.metamystia.server.network.handlers;
 
 import com.hz6826.memorypack.serializer.MemoryPackSerializer;
 import com.hz6826.memorypack.serializer.SerializerRegistry;
-import com.metamystia.server.config.AccessControlManager;
-import com.metamystia.server.config.ConfigManager;
+import com.metamystia.server.core.config.AccessControlManager;
+import com.metamystia.server.core.config.ConfigManager;
 import com.metamystia.server.core.packet.PacketDispatcher;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.room.RoomManager;
-import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import com.metamystia.server.network.actions.ActionType;
 import com.metamystia.server.network.actions.MessageAction;
@@ -22,6 +23,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -32,6 +35,9 @@ import java.util.function.Consumer;
 public class MainPacketHandler extends ChannelInboundHandlerAdapter {
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
     private final AtomicInteger activeConnections = new AtomicInteger(0);
+
+    private volatile ScheduledFuture<?> helloTimeoutFuture;
+    private volatile boolean helloReceived = false;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -59,10 +65,23 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
 
             String channelId = NetworkUtils.getChannelId(ctx);
 
+            if (actionType == ActionType.HELLO) {
+                helloReceived = true;
+                if (helloTimeoutFuture != null && !helloTimeoutFuture.isDone()) {
+                    helloTimeoutFuture.cancel(false);
+                }
+            }
+
             PacketDispatcher.dispatch(channelId, action);
 
             if (DebugUtils.echo) {
                 sendAction(channelId, action);
+            }
+
+            if (in.readableBytes() > 0) {
+                log.warn("Unexpected bytes after action {}, total hex below:", action);
+                in.resetReaderIndex();
+                DebugUtils.logBufHex(in, "Hex for action " + action);
             }
         } finally {
             in.release();
@@ -110,6 +129,13 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
         }
 
         channels.put(NetworkUtils.getChannelId(ctx), ctx.channel());
+        helloTimeoutFuture = ctx.executor().schedule(() -> {
+            if (!helloReceived && ctx.channel().isActive()) {
+                log.warn("No HelloAction received within {}s, closing connection from {}", ConfigManager.getConfig().getHelloTimeoutSeconds(), ctx.channel().remoteAddress());
+                ctx.writeAndFlush(MessageAction.ofServerMessage("Connection timeout: no hello message"))
+                        .addListener(f -> ctx.close());
+            }
+        }, ConfigManager.getConfig().getHelloTimeoutSeconds(), TimeUnit.SECONDS);
         super.channelActive(ctx);
     }
 
@@ -118,8 +144,9 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
         String channelId = NetworkUtils.getChannelId(ctx);
         log.info("Connection closed from {}", ctx.channel().remoteAddress());
         try {
-            User.getUserByChannelId(channelId).ifPresentOrElse(
+            UserManager.getUserByChannelId(channelId).ifPresentOrElse(
                     user -> {
+                        PluginManager.getAuthProvider().onUserLeave(user);
                         try {
                             user.getRoom().ifPresent(room -> {
                                 try {
@@ -129,7 +156,7 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
                                 }
                             });
                         } finally {
-                            User.removeUser(user);
+                            UserManager.removeUser(user);
                         }
                     },
                     () -> log.warn("User not found for channel {}", channelId)
@@ -138,6 +165,9 @@ public class MainPacketHandler extends ChannelInboundHandlerAdapter {
             log.error("Error during channel inactive cleanup: ", e);
         } finally {
             activeConnections.decrementAndGet();
+            if (helloTimeoutFuture != null && !helloTimeoutFuture.isDone()) {
+                helloTimeoutFuture.cancel(false);
+            }
             channels.remove(channelId);
             super.channelInactive(ctx);
         }

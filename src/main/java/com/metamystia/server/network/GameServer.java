@@ -1,7 +1,8 @@
 package com.metamystia.server.network;
 
-import com.metamystia.server.config.ConfigManager;
-import com.metamystia.server.console.command.CommandManager;
+import com.metamystia.server.api.command.CommandManager;
+import com.metamystia.server.core.config.ConfigManager;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.network.handlers.DebugInboundHandler;
 import com.metamystia.server.network.handlers.DebugOutboundHandler;
@@ -76,6 +77,7 @@ public class GameServer {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
 
+            PluginManager.getAuthProvider().shutdown();
             CommandManager.shutdown();
             RoomManager.shutdown();
             log.info("Game server stopped");

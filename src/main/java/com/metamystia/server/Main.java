@@ -1,9 +1,11 @@
 package com.metamystia.server;
 
 import com.hz6826.memorypack.util.MemoryPackInitializerWrapper;
-import com.metamystia.server.config.AccessControlManager;
-import com.metamystia.server.config.ConfigManager;
-import com.metamystia.server.console.command.CommandManager;
+import com.metamystia.server.api.command.CommandManager;
+import com.metamystia.server.core.command.CommandRegistry;
+import com.metamystia.server.core.config.AccessControlManager;
+import com.metamystia.server.core.config.ConfigManager;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.room.RoomManager;
 import com.metamystia.server.network.GameServer;
 import com.metamystia.server.util.BootstrapTips;
@@ -45,6 +47,9 @@ public class Main {
         if (ConfigManager.getConfig().isDisableAuth()) {
             log.warn("Auth is disabled! This is not recommended in production environment!");
         }
+
+        CommandRegistry.registerCommands();
+        PluginManager.init();
 
         AccessControlManager.loadLists();
         MemoryPackInitializerWrapper.registerAll();

@@ -1,7 +1,8 @@
 package com.metamystia.server.core.room;
 
-import com.metamystia.server.core.user.PermissionLevel;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.actions.*;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class LobbyRoom extends AbstractRoom {
         broadcastToRoomExcept("User joined lobby: " + user.getPeerId(), user);
 
         user.sendAction(HelloAction.getServerDefaultWithUser(user));
-        user.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
+        user.sendOverrideRoleAction(OverrideRoleAction.Role.CLIENT);
 
         log.info("User joined lobby: {}", user.getPeerId());
     }
@@ -41,9 +42,9 @@ public class LobbyRoom extends AbstractRoom {
 
     @Override
     public void onPacketReceived(User user, AbstractNetAction action) {
-        if (action.getType() == ActionType.MESSAGE && user.hasPermissionAtLeast(PermissionLevel.USER)) {
+        if (action.getType() == ActionType.MESSAGE && PluginManager.getAuthProvider().permissionCheck(user, "chat.send")) {
             MessageAction messageAction = (MessageAction) action;
-            messageAction.addDecorator("<" + User.getUserOrChannelIdString(user.getChannelId()) + "> ");
+            messageAction.addDecorator("<" + UserManager.getUserOrChannelIdString(user.getChannelId()) + "> ");
             broadcastToRoomExcept(messageAction, user);
         }
     }

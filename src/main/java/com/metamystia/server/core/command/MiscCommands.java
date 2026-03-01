@@ -1,13 +1,14 @@
-package com.metamystia.server.console.command;
+package com.metamystia.server.core.command;
 
-import com.metamystia.server.core.user.PermissionLevel;
+import com.metamystia.server.api.command.CommandManager;
+import com.metamystia.server.api.command.CommandSource;
 import com.metamystia.server.util.ManifestManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
-import static com.metamystia.server.console.command.CommandManager.argument;
-import static com.metamystia.server.console.command.CommandManager.literal;
+import static com.metamystia.server.api.command.CommandManager.argument;
+import static com.metamystia.server.api.command.CommandManager.literal;
 
 public class MiscCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
@@ -16,7 +17,7 @@ public class MiscCommands {
                         .then(argument("command", StringArgumentType.greedyString()).executes(MiscCommands::helpCommand))
         );
         dispatcher.register(
-                literal("version").requires(commandSource -> commandSource.user().hasPermissionAtLeast(PermissionLevel.USER))
+                literal("version").requires(commandSource -> commandSource.permissionCheck("command.version"))
                         .executes(MiscCommands::versionCommand)
         );
     }

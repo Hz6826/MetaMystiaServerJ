@@ -1,7 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +23,7 @@ public abstract class AbstractNetAction {
     private long timestampMs;
     private long senderId;
 
-    public static final long SERVER_SENDER_ID = 0L;
+    public static final long SERVER_SENDER_ID = -1L;
 
     protected AbstractNetAction() {
         this.timestampMs = Instant.now().toEpochMilli();
@@ -46,13 +46,13 @@ public abstract class AbstractNetAction {
     protected void logActionReceived(String channelId) {
         LogLevel logLevel = this.getLogLevel();
         if (logLevel == LogLevel.DEBUG) {
-            log.debug("Received [{}] from {} - {}", this.getType(), User.getUserOrChannelIdString(channelId), this);
+            log.debug("Received [{}] from {} - {}", this.getType(), UserManager.getUserOrChannelIdString(channelId), this);
         } else if (logLevel == LogLevel.INFO) {
-            log.info("Received [{}] from {} - {}", this.getType(), User.getUserOrChannelIdString(channelId), this);
+            log.info("Received [{}] from {} - {}", this.getType(), UserManager.getUserOrChannelIdString(channelId), this);
         } else if (logLevel == LogLevel.WARN) {
-            log.warn("Received [{}] from {} - {}", this.getType(), User.getUserOrChannelIdString(channelId), this);
+            log.warn("Received [{}] from {} - {}", this.getType(), UserManager.getUserOrChannelIdString(channelId), this);
         } else if (logLevel == LogLevel.ERROR) {
-            log.error("Received [{}] from {} - {}", this.getType(), User.getUserOrChannelIdString(channelId), this);
+            log.error("Received [{}] from {} - {}", this.getType(), UserManager.getUserOrChannelIdString(channelId), this);
         }
     }
 

@@ -17,7 +17,7 @@ public class OverrideRoleAction extends AbstractNetAction {
     /// Encoded as: 0 = null, 1 = Host, 2 = Client.
     /// </summary>
     public enum Role {
-        CLEAR,
+        NULL,
         HOST,
         CLIENT
     }

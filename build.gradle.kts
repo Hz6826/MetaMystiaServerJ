@@ -6,10 +6,7 @@ plugins {
     id("com.gradleup.shadow") version "9.3.1"
 }
 
-group = "com.metamystia.server"
-version = "0.3.0"
-
-var metaMystiaVersion = "~0.17.0"
+val metaMystiaVersion: String by project
 
 repositories {
     maven { url = uri("https://maven.aliyun.com/repository/public/") }
@@ -23,37 +20,38 @@ repositories {
 
 dependencies {
     // networking
-    implementation("io.netty:netty-all:4.2.9.Final")
+    implementation(libs.netty.all)
 
     // json library
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
+    implementation(libs.jackson.databind)
 
     // logging library
-    implementation("org.apache.logging.log4j:log4j-core:2.25.3")
-    implementation("org.apache.logging.log4j:log4j-api:2.25.3")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.25.3")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation(libs.log4j.core)
+    implementation(libs.log4j.api)
+    implementation(libs.log4j.slf4j.impl)
+    implementation(libs.slf4j.api)
 
     // command library, cuz i like it
-    implementation("com.mojang:brigadier:1.0.18")
+    implementation(libs.brigadier)
 
     // data
-    annotationProcessor("org.projectlombok:lombok:1.18.42")
-    compileOnly("org.projectlombok:lombok:1.18.42")
+    annotationProcessor(libs.lombok)
+    compileOnly(libs.lombok)
 
     // annotation processor
-    annotationProcessor("com.google.auto.service:auto-service-annotations:1.1.1")
-    compileOnly("com.google.auto.service:auto-service:1.1.1")
+    annotationProcessor(libs.auto.service.annotations)
+    compileOnly(libs.auto.service)
 
     // memory pack TODO: replace with jitpack, and replace this local file reference
-    annotationProcessor(":memorypack:0.1.7")
-    implementation(":memorypack:0.1.7")
+    val memorypackVersion = libs.versions.memorypack.get()
+    annotationProcessor(":memorypack:$memorypackVersion")
+    implementation(":memorypack:$memorypackVersion")
 
-    annotationProcessor("org.slf4j:slf4j-api:1.7.30")
-    annotationProcessor("org.slf4j:slf4j-simple:1.7.30")
+    annotationProcessor(libs.slf4j.api)
+    annotationProcessor(libs.slf4j.simple)
 
     // tests
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

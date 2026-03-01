@@ -1,4 +1,4 @@
-package com.metamystia.server.console.command;
+package com.metamystia.server.api.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -6,9 +6,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 
 @Slf4j
 public class CommandManager {
@@ -26,11 +29,7 @@ public class CommandManager {
     public static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
 
     public static void init() {
-        DebugCommands.register(dispatcher);
-        RoomCommands.register(dispatcher);
-        AuthCommands.register(dispatcher);
-        MiscCommands.register(dispatcher);
-
+        eventBus.post(new CommandRegisterEvent(CommandManager.class, dispatcher));
     }
 
     private static void parse(String command, CommandSource source){
@@ -58,5 +57,23 @@ public class CommandManager {
 
     public static <T> RequiredArgumentBuilder<CommandSource, T> argument(final String name, final ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
+    }
+
+    private static class EventBus {
+        private final List<Consumer<CommandRegisterEvent>> listeners = new CopyOnWriteArrayList<>();
+
+        public void register(Consumer<CommandRegisterEvent> listener) {
+            listeners.add(listener);
+        }
+
+        public void post(CommandRegisterEvent event) {
+            listeners.forEach(l -> l.accept(event));
+        }
+    }
+
+    private static final EventBus eventBus = new EventBus();
+
+    public static void subscribe(Consumer<CommandRegisterEvent> listener) {
+        eventBus.register(listener);
     }
 }

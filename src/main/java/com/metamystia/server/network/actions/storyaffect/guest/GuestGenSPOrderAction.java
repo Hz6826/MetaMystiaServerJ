@@ -17,6 +17,7 @@ public class GuestGenSPOrderAction extends SendAffectStoryAction {
 
     private String guestUUID;
     private GuestOrder order;
+    @ToString.Exclude
     private String message;
 
     public GuestGenSPOrderAction() {

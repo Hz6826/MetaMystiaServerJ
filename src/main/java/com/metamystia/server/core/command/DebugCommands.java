@@ -1,8 +1,7 @@
-package com.metamystia.server.console.command;
+package com.metamystia.server.core.command;
 
-import com.metamystia.server.config.ConfigManager;
-import com.metamystia.server.console.command.arguments.PermissionLevelArgumentType;
-import com.metamystia.server.core.user.PermissionLevel;
+import com.metamystia.server.api.command.CommandSource;
+import com.metamystia.server.core.config.ConfigManager;
 import com.metamystia.server.network.GameServer;
 import com.metamystia.server.network.actions.OverrideRoleAction;
 import com.metamystia.server.network.actions.ReadyAction;
@@ -14,14 +13,14 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.metamystia.server.console.command.CommandManager.argument;
-import static com.metamystia.server.console.command.CommandManager.literal;
+import static com.metamystia.server.api.command.CommandManager.argument;
+import static com.metamystia.server.api.command.CommandManager.literal;
 
 @Slf4j
 public class DebugCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
-                literal("debug").requires(commandSource -> ConfigManager.getConfig().isDebug() || commandSource.user().hasPermissionAtLeast(PermissionLevel.ADMIN))
+                literal("debug").requires(commandSource -> ConfigManager.getConfig().isDebug() || commandSource.permissionCheck("command.debug"))
                         .then(literal("stop").executes(DebugCommands::stopCommand))
                         .then(literal("sendReady").executes(DebugCommands::sendReadyCommand))
                         .then(literal("sendPrepReady").executes(DebugCommands::sendPrepReadyCommand))
@@ -32,11 +31,6 @@ public class DebugCommands {
                         .then(literal("closeWithReason")
                                 .then(argument("reason", StringArgumentType.greedyString()).executes(DebugCommands::closeWithReasonCommand)))
                         .then(literal("switchEcho").executes(DebugCommands::switchEchoCommand))
-                        .then(literal("setPermissionLevel")
-                                .then(argument("permissionLevel", PermissionLevelArgumentType.permissionLevel())
-                                        .executes(DebugCommands::setPermissionLevelCommand)))
-                        .then(literal("getPermissionLevel")
-                                .executes(DebugCommands::getPermissionLevelCommand))
                         .then(literal("writeConfig")
                                 .executes(DebugCommands::writeConfigCommand))
                         .then(literal("hostRole")
@@ -81,19 +75,6 @@ public class DebugCommands {
         return 1;
     }
 
-    private static int setPermissionLevelCommand(CommandContext<CommandSource> context) {
-        PermissionLevel permissionLevel = PermissionLevelArgumentType.getPermissionLevel(context, "permissionLevel");
-        context.getSource().user().setPermissionLevel(permissionLevel);
-        context.getSource().user().sendMessage("Permission level set to: " + permissionLevel);
-        return 1;
-    }
-
-    private static int getPermissionLevelCommand(CommandContext<CommandSource> context) {
-        PermissionLevel permissionLevel = context.getSource().user().getPermissionLevel();
-        context.getSource().user().sendMessage("Permission level: " + permissionLevel);
-        return 1;
-    }
-
     private static int writeConfigCommand(CommandContext<CommandSource> context) {
         ConfigManager.saveConfigToFile();
         context.getSource().user().sendMessage("Config has been written to disk.");
@@ -101,13 +82,13 @@ public class DebugCommands {
     }
 
     private static int grantHostRoleCommand(CommandContext<CommandSource> context) {
-        context.getSource().user().sendAction(new OverrideRoleAction(OverrideRoleAction.Role.HOST));
+        context.getSource().user().sendOverrideRoleAction(OverrideRoleAction.Role.HOST);
         context.getSource().user().sendMessage("Host role is granted.");
         return 1;
     }
 
     private static int revokeHostRoleCommand(CommandContext<CommandSource> context) {
-        context.getSource().user().sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
+        context.getSource().user().sendOverrideRoleAction(OverrideRoleAction.Role.CLIENT);
         context.getSource().user().sendMessage("Client role is granted.");
         return 1;
     }

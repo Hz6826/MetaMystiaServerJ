@@ -13,7 +13,7 @@ import lombok.ToString;
 public class PrepAction extends AbstractNetAction{
     private ActionType type = ActionType.PREP;
 
-    private Table prepTable;
+    @ToString.Exclude private Table prepTable;
 
     public PrepAction() {
         super();

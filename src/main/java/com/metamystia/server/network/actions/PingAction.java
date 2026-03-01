@@ -1,7 +1,7 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.util.LogLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,7 +34,7 @@ public class PingAction extends AbstractNetAction{
 
     @Override
     public boolean onReceivedDerived(String channelId) {
-        User.getUserByChannelId(channelId).ifPresent(user -> {
+        UserManager.getUserByChannelId(channelId).ifPresent(user -> {
             user.setLatency(System.currentTimeMillis() - this.getTimestampMs());
             user.sendAction(new PongAction(this.id));
         });

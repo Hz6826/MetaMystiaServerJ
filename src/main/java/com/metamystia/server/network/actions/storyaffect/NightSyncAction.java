@@ -1,7 +1,7 @@
 package com.metamystia.server.network.actions.storyaffect;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.actions.ActionType;
 import com.metamystia.server.util.LogLevel;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class NightSyncAction extends AffectStoryAction{
 
     @Override
     public boolean onReceivedDerived(String channelId) {
-        User.getUserByChannelId(channelId).ifPresent(
+        UserManager.getUserByChannelId(channelId).ifPresent(
                 user -> user.getUserPos().updateFromNightSyncAction(this)
         );
         return false;

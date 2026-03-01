@@ -1,6 +1,7 @@
 package com.metamystia.server.core.room;
 
 import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class RoomManager {
         }
         List<Long> userIdsCopy = room.getUserIds().stream().toList();
         userIdsCopy.forEach(userId ->
-                User.getUserById(userId).ifPresent(user -> room.removeUser(user, toRoomId))
+                UserManager.getUserById(userId).ifPresent(user -> room.removeUser(user, toRoomId))
         );
         rooms.remove(room.getRoomId());
     }

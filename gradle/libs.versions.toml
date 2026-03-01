@@ -1,0 +1,24 @@
+[versions]
+netty = "4.2.9.Final"
+jackson = "2.21.0"
+log4j = "2.25.3"
+slf4j = "1.7.30"
+brigadier = "1.0.18"
+lombok = "1.18.42"
+auto-service = "1.1.1"
+memorypack = "0.1.7"
+junit = "5.10.0"
+
+[libraries]
+netty-all = { group = "io.netty", name = "netty-all", version.ref = "netty" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
+log4j-slf4j-impl = { group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version.ref = "log4j" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+brigadier = { group = "com.mojang", name = "brigadier", version.ref = "brigadier" }
+lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+auto-service-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "auto-service" }
+auto-service = { group = "com.google.auto.service", name = "auto-service", version.ref = "auto-service" }
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }

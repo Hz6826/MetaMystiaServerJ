@@ -1,12 +1,11 @@
 package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
-import com.metamystia.server.config.AccessControlManager;
-import com.metamystia.server.config.ConfigManager;
+import com.metamystia.server.core.config.ConfigManager;
 import com.metamystia.server.core.gamedata.Scene;
-import com.metamystia.server.core.room.RoomManager;
-import com.metamystia.server.core.user.PermissionLevel;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.handlers.MainPacketHandler;
 import com.metamystia.server.util.ManifestManager;
 import com.metamystia.server.util.VersionValidators;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -33,12 +31,12 @@ public class HelloAction extends AbstractNetAction{
     private Scene currentGameScene;
 
     private List<String> peerActiveDLCLabel;
-    private Set<Integer> peerDLCRecipes;
-    private Set<Integer> peerDLCCookers;
-    private Set<Integer> peerDLCFoods;
-    private Set<Integer> peerDLCBeverages;
-    private Set<Integer> peerDLCNormalGuests;
-    private Set<Integer> peerDLCSpecialGuests;
+    @ToString.Exclude private Set<Integer> peerDLCRecipes;
+    @ToString.Exclude private Set<Integer> peerDLCCookers;
+    @ToString.Exclude private Set<Integer> peerDLCFoods;
+    @ToString.Exclude private Set<Integer> peerDLCBeverages;
+    @ToString.Exclude private Set<Integer> peerDLCNormalGuests;
+    @ToString.Exclude private Set<Integer> peerDLCSpecialGuests;
 
     // ResourceEx (rEx) resource sets
     private Set<Integer> peerRExRecipes;
@@ -88,7 +86,7 @@ public class HelloAction extends AbstractNetAction{
 
     @Override
     public boolean onReceivedDerived(String channelId) {
-        User user = User.createUser(this, channelId);  // to avoid no user found in MainPacketHandler.channelInactive method
+        User user = UserManager.createUser(this, channelId);  // to avoid no user found in MainPacketHandler.channelInactive method
         if (!VersionValidators.isMetaMystiaVersionValid(this.getVersion())) {
             MainPacketHandler.closeWithReason(channelId, "Invalid version! Supported version(s): " + ManifestManager.getManifest().metaMystiaVersion());
             return true;
@@ -97,21 +95,7 @@ public class HelloAction extends AbstractNetAction{
         if (user.getRoom().isEmpty()) {
             user.sendAction(getServerDefaultWithHelloAction(this));
             user.sendMessage("Welcome to " + ConfigManager.getConfig().getServerName() + "! Version: " + ManifestManager.getManifest().version());
-            RoomManager.getLobbyRoom().addUser(user);
-
-            if (ConfigManager.getConfig().isDisableAuth()) {
-                if (AccessControlManager.isIpOp(user.getIp()) || AccessControlManager.isIdOp(user.getId())) {
-                    user.setPermissionLevel(PermissionLevel.ADMIN);
-                    user.sendMessage("Welcome back, Admin!");
-                } else {
-                    user.setPermissionLevel(PermissionLevel.USER);
-                }
-            } else {
-                user.setPermissionLevel(PermissionLevel.GUEST);
-                user.sendMessage("You are not logged in! Use: !auth login <password> to log in.");
-                int timeoutSeconds = ConfigManager.getConfig().getLoginTimeoutSeconds();
-                user.scheduleLoginTimeout(timeoutSeconds, TimeUnit.SECONDS);
-            }
+            PluginManager.getAuthProvider().onUserJoin(user);
         }
 
         log.info("User registered: {}, channel: {}", this.getSenderId(), channelId);

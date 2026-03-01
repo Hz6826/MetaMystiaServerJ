@@ -1,32 +1,38 @@
-package com.metamystia.server.console.command;
+package com.metamystia.server.core.command;
 
+import com.metamystia.server.api.command.CommandSource;
 import com.metamystia.server.core.room.AbstractRoom;
 import com.metamystia.server.core.room.PairRoom;
 import com.metamystia.server.core.room.RoomManager;
-import com.metamystia.server.core.user.PermissionLevel;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
-import static com.metamystia.server.console.command.CommandManager.argument;
-import static com.metamystia.server.console.command.CommandManager.literal;
+import static com.metamystia.server.api.command.CommandManager.argument;
+import static com.metamystia.server.api.command.CommandManager.literal;
 
 public class RoomCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
-                literal("room").requires(commandSource -> commandSource.user().hasPermissionAtLeast(PermissionLevel.USER))
-                        .then(literal("list").executes(RoomCommands::listRoomsCommand))
-                        .then(literal("info").executes(RoomCommands::roomInfoCommand)
-                                .then(literal("users").executes(RoomCommands::roomUserInfoCommand)))
-                        .then(literal("create")
-                                .then(literal("pair").executes(RoomCommands::createPairRoomCommand)))
-                        .then(literal("inviteCode").executes(RoomCommands::inviteCodeCommand)
-                                .then(literal("renew").executes(RoomCommands::renewInviteCodeCommand)))
-                        .then(literal("join")
+                literal("room").requires(commandSource -> commandSource.permissionCheck("command.room"))
+                        .then(literal("list").executes(RoomCommands::listRoomsCommand)).requires(commandSource -> commandSource.permissionCheck("command.room.list"))
+                        .then(literal("info").executes(RoomCommands::roomInfoCommand).requires(commandSource -> commandSource.permissionCheck("command.room.info"))
+                                .then(literal("users").requires(commandSource -> commandSource.permissionCheck("command.room.info.users"))
+                                        .executes(RoomCommands::roomUserInfoCommand)))
+                        .then(literal("create").requires(commandSource -> commandSource.permissionCheck("command.room.create"))
+                                .then(literal("pair").requires(commandSource -> commandSource.permissionCheck("command.room.create.pair"))
+                                        .executes(RoomCommands::createPairRoomCommand)))
+                        .then(literal("inviteCode").requires(commandSource -> commandSource.permissionCheck("command.room.inviteCode"))
+                                .executes(RoomCommands::inviteCodeCommand)
+                                .then(literal("renew").requires(commandSource -> commandSource.permissionCheck("command.room.inviteCode.renew"))
+                                        .executes(RoomCommands::renewInviteCodeCommand)))
+                        .then(literal("join").requires(commandSource -> commandSource.permissionCheck("command.room.join"))
                                 .then(argument("inviteCode", StringArgumentType.string()).executes(RoomCommands::joinRoomCommand))
                         )
-                        .then(literal("leave").executes(RoomCommands::leaveRoomCommand))
-                        .then(literal("disband").executes(RoomCommands::disbandRoomCommand))
+                        .then(literal("leave").requires(commandSource -> commandSource.permissionCheck("command.room.leave"))
+                                .executes(RoomCommands::leaveRoomCommand))
+                        .then(literal("disband").requires(commandSource -> commandSource.permissionCheck("command.room.disband"))
+                                .executes(RoomCommands::disbandRoomCommand))
         );
     }
 

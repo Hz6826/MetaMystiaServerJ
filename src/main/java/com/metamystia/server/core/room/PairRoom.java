@@ -1,7 +1,9 @@
 package com.metamystia.server.core.room;
 
 import com.metamystia.server.core.gamedata.Scene;
+import com.metamystia.server.core.plugin.PluginManager;
 import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.actions.*;
 import lombok.ToString;
 
@@ -9,6 +11,7 @@ import java.util.concurrent.locks.Lock;
 
 @ToString(callSuper = true)
 public class PairRoom extends AbstractRoom {
+    private volatile boolean scheduleClosed = false;
     private static final int CAPACITY = 2;
 
     public PairRoom() {
@@ -26,7 +29,7 @@ public class PairRoom extends AbstractRoom {
         lock.lock();
         try {
             if (getUserCount() == 2) {
-                user.sendAction(User.getUserById(this.getUserIds().getFirst()).orElseThrow().getHelloAction());
+                user.sendAction(UserManager.getUserById(this.getUserIds().getFirst()).orElseThrow().getHelloAction());
             }
         } finally {
             lock.unlock();
@@ -41,19 +44,13 @@ public class PairRoom extends AbstractRoom {
         lock.lock();
         try {
             if (getUserCount() == 1) {
-                User firstUser = User.getUserById(this.getUserIds().getFirst()).orElseThrow();
+                User firstUser = UserManager.getUserById(this.getUserIds().getFirst()).orElseThrow();
                 if (firstUser.getCurrentGameScene() == Scene.DayScene || firstUser.getCurrentGameScene() == Scene.ResultScene) {
                     firstUser.sendAction(HelloAction.getServerDefaultWithUser(user));
                 } else {
                     firstUser.sendMessage("Your partner left the room, so this room will be closed after the night ends.");
-                    firstUser.addOneTimeSceneChangeListener(new User.SceneChangeListener() {
-                        @Override
-                        public void onSceneChange(Scene oldScene, Scene newScene) {
-                            if (newScene == Scene.DayScene) {
-                                removeUserToDefaultLobby(user);
-                            }
-                        }
-                    });
+                    setLocked(true);
+                    scheduleClosed = true;
                 }
             }
         } finally {
@@ -64,22 +61,27 @@ public class PairRoom extends AbstractRoom {
     @Override
     public void onOwnerChange(User oldOwner, User newOwner) {
         if(oldOwner != null){
-            oldOwner.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.CLIENT));
+            oldOwner.sendOverrideRoleAction(OverrideRoleAction.Role.CLIENT);
         }
-        newOwner.sendAction(new OverrideRoleAction(OverrideRoleAction.Role.HOST));
+        newOwner.sendOverrideRoleAction(OverrideRoleAction.Role.HOST);
     }
 
     @Override
     public void onPacketReceived(User user, AbstractNetAction action) {
         if (action.getType() == ActionType.READY) {
             ReadyAction readyAction = (ReadyAction) action;
-            if (readyAction.isAllReady() || isAllReady(readyAction.getReadyType())) {
+            if (isAllReady(readyAction.getReadyType())) {
                 clearReadyState(readyAction.getReadyType());
                 broadcastToRoom(new ReadyAction(readyAction.getReadyType(), true));
                 return;
             }
+            if (readyAction.isAllReady()) return;  // ignore
         } else if (action.getType() == ActionType.OVERRIDE_ROLE) {
             return;  // ignore
+        } else if (action.getType() == ActionType.MESSAGE && !PluginManager.getAuthProvider().permissionCheck(user, "chat.send")) {
+            return;
+        } else if (action.getType() == ActionType.SCENE_TRANSIT && ((SceneTransitAction) action).getScene() == Scene.DayScene && scheduleClosed) {
+            RoomManager.removeRoom(this);
         }
         broadcastToRoomExcept(action, user);
     }
@@ -101,9 +103,9 @@ public class PairRoom extends AbstractRoom {
             if(getUserCount() == 0) {
                 return "PairRoom";
             } else if (getUserCount() == 1) {
-                return "PairRoom - " + User.getUserById(getUserIds().getFirst()).orElseThrow().getPeerId();
+                return "PairRoom - " + UserManager.getUserById(getUserIds().getFirst()).orElseThrow().getPeerId();
             } else {
-                return "PairRoom - " + User.getUserById(getUserIds().getFirst()).orElseThrow().getPeerId() + " & " + User.getUserById(getUserIds().get(1)).orElseThrow().getPeerId();
+                return "PairRoom - " + UserManager.getUserById(getUserIds().getFirst()).orElseThrow().getPeerId() + " & " + UserManager.getUserById(getUserIds().get(1)).orElseThrow().getPeerId();
             }
         } finally {
             lock.unlock();
@@ -116,7 +118,7 @@ public class PairRoom extends AbstractRoom {
         lock.lock();
         try {
             for (long id : getUserIds()) {
-                User user = User.getUserById(id).orElseThrow();
+                User user = UserManager.getUserById(id).orElseThrow();
                 if (!user.getReadyState().getReadyFor(readyType)) {
                     allReady = false;
                     break;
@@ -133,7 +135,7 @@ public class PairRoom extends AbstractRoom {
         lock.lock();
         try {
             for (long id : getUserIds()) {
-                User user = User.getUserById(id).orElseThrow();
+                User user = UserManager.getUserById(id).orElseThrow();
                 user.getReadyState().setReadyFor(readyType, false);
             }
         } finally {

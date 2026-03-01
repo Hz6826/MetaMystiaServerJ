@@ -1,6 +1,7 @@
 package com.metamystia.server.core.room;
 
 import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import com.metamystia.server.network.actions.AbstractNetAction;
 import lombok.*;
 
@@ -33,6 +34,9 @@ public abstract class AbstractRoom {
 
     @Setter(AccessLevel.PROTECTED)
     private volatile boolean broadcastHelloAction = false;
+
+    @Setter(AccessLevel.PROTECTED)
+    private volatile boolean locked = false;
 
     @Setter(AccessLevel.PRIVATE)
     private List<Long> userIds = new ArrayList<>();
@@ -69,7 +73,7 @@ public abstract class AbstractRoom {
         userIdsLock.readLock().lock();
         try {
             for (Long userId : userIds) {
-                User.getUserById(userId).ifPresent(user -> user.sendAction(action));
+                UserManager.getUserById(userId).ifPresent(user -> user.sendAction(action));
             }
         } finally {
             userIdsLock.readLock().unlock();
@@ -81,7 +85,7 @@ public abstract class AbstractRoom {
         try {
             for (Long userId : userIds) {
                 if (userId != excluded.getId()) {
-                    User.getUserById(userId).ifPresent(user2 -> user2.sendAction(action));
+                    UserManager.getUserById(userId).ifPresent(user2 -> user2.sendAction(action));
                 }
             }
         } finally {
@@ -93,7 +97,7 @@ public abstract class AbstractRoom {
         userIdsLock.readLock().lock();
         try {
             for (Long userId : userIds) {
-                User.getUserById(userId).ifPresent(user -> user.sendMessage(message));
+                UserManager.getUserById(userId).ifPresent(user -> user.sendMessage(message));
             }
         } finally {
             userIdsLock.readLock().unlock();
@@ -105,7 +109,7 @@ public abstract class AbstractRoom {
         try {
             for (Long userId : userIds) {
                 if (userId != excluded.getId()) {
-                    User.getUserById(userId).ifPresent(user2 -> user2.sendMessage(message));
+                    UserManager.getUserById(userId).ifPresent(user2 -> user2.sendMessage(message));
                 }
             }
         } finally {
@@ -120,7 +124,7 @@ public abstract class AbstractRoom {
     public final void changeOwner(User newOwner) {
         userIdsLock.writeLock().lock();
         try {
-            User oldOwner = User.getUserById(ownerId).orElse(null);
+            User oldOwner = UserManager.getUserById(ownerId).orElse(null);
             this.ownerId = newOwner.getId();
             onOwnerChange(oldOwner, newOwner);
         } finally {
@@ -136,6 +140,9 @@ public abstract class AbstractRoom {
             }
             if (isUserInRoom(user)) {
                 throw new IllegalStateException("User " + user + " is already in room " + roomId);
+            }
+            if (locked) {
+                throw new IllegalStateException("Cannot add " + user + ", room " + roomId + " is locked");
             }
 
             if (autoSetFirstUserAsOwner && userIds.isEmpty() && isDisowned()) {
@@ -163,7 +170,7 @@ public abstract class AbstractRoom {
             }
 
             if (autoTransferOwnerOnLeave && user.getId() == ownerId) {
-                userIds.stream().findFirst().flatMap(User::getUserById).ifPresentOrElse(this::changeOwner, () -> this.ownerId = NO_OWNER);
+                userIds.stream().findFirst().flatMap(UserManager::getUserById).ifPresentOrElse(this::changeOwner, () -> this.ownerId = NO_OWNER);
             }
 
             onUserLeave(user);
@@ -255,7 +262,7 @@ public abstract class AbstractRoom {
             int count = 0;
             boolean hasMore = false;
             for (Long userId : userIds) {
-                Optional<User> userOpt = User.getUserById(userId);
+                Optional<User> userOpt = UserManager.getUserById(userId);
                 if (userOpt.isPresent()) {
                     if (limit > 0 && count >= limit) {
                         hasMore = true;
@@ -282,7 +289,7 @@ public abstract class AbstractRoom {
         return "Name: " + getName() + "\n" +
                 "Description: " + description + "\n" +
                 "Capacity: " + capacity + "\n" +
-                "Owner: " + (isDisowned() ? "None" : User.getUserById(ownerId).map(User::getPeerId).orElse("Unknown")) + "\n" +
+                "Owner: " + (isDisowned() ? "None" : UserManager.getUserById(ownerId).map(User::getPeerId).orElse("Unknown")) + "\n" +
                 "Users(" + getUserCount() + "): " + getUserNames(3) + "\n" +
                 "Invite Code: " + (isInviteCodeGenerated() ? getInviteCode() : "None");
     }

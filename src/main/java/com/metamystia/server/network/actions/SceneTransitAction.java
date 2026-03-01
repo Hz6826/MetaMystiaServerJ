@@ -2,7 +2,7 @@ package com.metamystia.server.network.actions;
 
 import com.hz6826.memorypack.annotation.MemoryPackable;
 import com.metamystia.server.core.gamedata.Scene;
-import com.metamystia.server.core.user.User;
+import com.metamystia.server.core.user.UserManager;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,9 +27,7 @@ public class SceneTransitAction extends AbstractNetAction{
 
     @Override
     public boolean onReceivedDerived(String channelId) {
-        User.getUserByChannelId(channelId).ifPresent(user -> {
-            user.setCurrentGameScene(scene);
-        });
+        UserManager.getUserByChannelId(channelId).ifPresent(user -> user.setCurrentGameScene(scene));
         return false;
     }
 }

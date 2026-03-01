@@ -1,4 +1,4 @@
-package com.metamystia.server.config;
+package com.metamystia.server.core.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,18 +28,16 @@ public class ConfigManager {
 
         private int port = 40815;
         private int maxPlayers = 20;
-        private int loginTimeoutSeconds = 60;
+        private int helloTimeoutSeconds = 5;
 
         private boolean whitelist = false;
-        private String whitelistFile = "whitelist.txt";
         private String whitelistIpFile = "whitelist_ip.txt";
 
         private boolean blacklist = false;
-        private String blacklistFile = "blacklist.txt";
         private String blacklistIpFile = "blacklist_ip.txt";
 
-        private String opListFile = "ops.txt";
-        private String opListIpFile = "ops_ip.txt";
+        private String pluginFolder = "plugins";
+        private String authProviderPluginId = "";
 
         private boolean noTip = false;
         private boolean showManifest = false;
@@ -94,5 +92,6 @@ public class ConfigManager {
         if (argsList.contains("--log-hex")) config.setLogHex(true);
         if (argsList.contains("--port")) config.setPort(Integer.parseInt(argsList.get(argsList.indexOf("--port") + 1)));
         if (argsList.contains("-p")) config.setPort(Integer.parseInt(argsList.get(argsList.indexOf("-p") + 1)));
+        if (argsList.contains("--plugin-folder")) config.setPluginFolder(argsList.get(argsList.indexOf("--plugin-folder") + 1));
     }
 }
